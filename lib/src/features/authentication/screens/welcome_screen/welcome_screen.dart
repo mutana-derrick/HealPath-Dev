@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:healpath/src/features/authentication/screens/login/login_screen.dart';
 import 'package:get/get.dart';
-import 'package:healpath/src/features/authentication/screens/signup/signup_screen.dart';
+// import 'package:healpath/src/features/authentication/screens/signup/signup_screen.dart';
+import 'package:healpath/src/features/patient/patient_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -51,7 +52,7 @@ class WelcomeScreen extends StatelessWidget {
                 ),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () => Get.to(() => const SignUpScreen()),
+                    onPressed: () => Get.to(() => const PatientScreen()),
                     style: OutlinedButton.styleFrom(
                       shape: const RoundedRectangleBorder(),
                       foregroundColor: Colors.white,
