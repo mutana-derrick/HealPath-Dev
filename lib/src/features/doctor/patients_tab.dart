@@ -1,4 +1,3 @@
-// lib/tabs/patients_tab.dart
 import 'package:flutter/material.dart';
 
 class Patient {
@@ -42,24 +41,50 @@ class _PatientsTabState extends State<PatientsTab> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: ElevatedButton(
-            onPressed: () => _showAddPatientDialog(),
-            child: const Text("Add New Patient"),
+    return Scaffold(
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25.0),
+              ),
+              elevation: 5,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                child: TextField(
+                  decoration: const InputDecoration(
+                    hintText: 'Search patients...',
+                    prefixIcon: Icon(Icons.search),
+                    border: InputBorder.none,
+                    suffixIcon: Icon(Icons.people),
+                  ),
+                  onChanged: (value) {
+                    // TODO: Implement search functionality
+                  },
+                ),
+              ),
+            ),
           ),
-        ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: patients.length,
-            itemBuilder: (context, index) {
-              return _buildPatientCard(patients[index]);
-            },
+          Expanded(
+            child: ListView.builder(
+              itemCount: patients.length,
+              itemBuilder: (context, index) {
+                return _buildPatientCard(patients[index]);
+              },
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showAddPatientDialog(),
+        backgroundColor: Colors.blue[500],
+        child: Icon(
+          Icons.add,
+          color: Colors.blue[900], // Color of the icon
+        ), // Background color of the button
+      ),
     );
   }
 
