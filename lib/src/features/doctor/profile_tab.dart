@@ -40,7 +40,7 @@ class _ProfileTabState extends State<ProfileTab> {
               Tab(text: 'Send Notification'),
               Tab(text: 'Sent Notifications'),
             ],
-            labelColor: Colors.purple,
+            labelColor: Colors.blue,
             unselectedLabelColor: Colors.grey,
           ),
           Expanded(
@@ -146,15 +146,22 @@ class _ProfileTabState extends State<ProfileTab> {
       itemCount: sentNotifications.length,
       itemBuilder: (context, index) {
         final notification = sentNotifications[index];
-        return ListTile(
-          title: Text(notification['title']!),
-          subtitle: Text('Date: ${notification['date']}'),
-          trailing: Chip(
-            label: Text(notification['status']!),
-            backgroundColor: notification['status'] == 'Approved'
-                ? Colors.green
-                : Colors.orange,
-          ),
+        return Column(
+          children: [
+            ListTile(
+              title: Text(notification['title']!),
+              subtitle: Text('Date: ${notification['date']}'),
+              trailing: Chip(
+                label: Text(notification['status']!),
+                backgroundColor: notification['status'] == 'Approved'
+                    ? Colors.green
+                    : Colors.orange,
+              ),
+            ),
+            // Add a Divider only if it's not the last item
+            if (index < sentNotifications.length - 1)
+              const Divider(color: Colors.grey), // You can customize the color
+          ],
         );
       },
     );

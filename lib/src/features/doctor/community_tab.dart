@@ -137,7 +137,7 @@ class _InteractivePostCardState extends State<InteractivePostCard> {
             leading: CircleAvatar(
               backgroundColor: Colors.blue,
               child:
-                  Text(widget.author[0], style: TextStyle(color: Colors.white)),
+                  Text(widget.author[0], style: const TextStyle(color: Colors.white),),
             ),
             title: Text(widget.title,
                 style: const TextStyle(fontWeight: FontWeight.bold)),
