@@ -166,6 +166,20 @@ class NotificationsList extends StatelessWidget {
           children: [
             AppBar(
               title: const Text('Notifications'),
+              backgroundColor: Colors.blue,
+              elevation: 1,
+              flexibleSpace: Container(
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3), // Shadow color
+                      spreadRadius: 3, // How much the shadow spreads
+                      blurRadius: 10, // Softness of the shadow
+                      offset: Offset(0, 4), // X and Y offset of the shadow
+                    ),
+                  ],
+                ),
+              ),
               leading: IconButton(
                 icon: const Icon(Icons.close),
                 onPressed: () => Navigator.of(context).pop(),
@@ -309,7 +323,19 @@ class _CommentsSheetState extends State<CommentsSheet> {
             AppBar(
               title: Text('${widget.post.userName}\'s Post'),
               backgroundColor: Colors.blue,
-              elevation: 10, // Adds shadow to the AppBar
+              elevation: 1,
+              flexibleSpace: Container(
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3), // Shadow color
+                      spreadRadius: 3, // How much the shadow spreads
+                      blurRadius: 10, // Softness of the shadow
+                      offset: Offset(0, 4), // X and Y offset of the shadow
+                    ),
+                  ],
+                ),
+              ),
               leading: IconButton(
                 icon: const Icon(Icons.close),
                 onPressed: () => Navigator.of(context).pop(),
