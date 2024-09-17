@@ -45,7 +45,6 @@ class PatientProfileTab extends StatelessWidget {
           Center(
             child: CircleAvatar(
               radius: 50,
-              backgroundImage: NetworkImage(controller.profileImageUrl),
               backgroundColor: Colors.purple,
               child: controller.profileImageUrl.isEmpty
                   ? Text(
@@ -59,7 +58,6 @@ class PatientProfileTab extends StatelessWidget {
           _buildInfoField('Name', controller.nameController.text),
           _buildInfoField('Email', controller.emailController.text),
           _buildInfoField('Password', controller.passwordController.text),
-          _buildInfoField('Emergency Contact', controller.emergencyContact),
           const SizedBox(height: 20),
           Center(
             child: ElevatedButton(
@@ -113,13 +111,6 @@ class PatientProfileTab extends StatelessWidget {
                   decoration: const InputDecoration(labelText: 'Password'),
                   controller: controller.passwordController,
                 ),
-                TextField(
-                  decoration:
-                      const InputDecoration(labelText: 'Emergency Contact'),
-                  controller:
-                      TextEditingController(text: controller.emergencyContact),
-                  onChanged: (value) => controller.emergencyContact = value,
-                ),
               ],
             ),
           ),
@@ -157,7 +148,6 @@ class PatientProfileController extends GetxController {
     nameController.text = 'John Doe';
     emailController.text = 'john.doe@example.com';
     passwordController.text = 'password';
-    emergencyContact = 'Jane Doe: +9876543210';
   }
 
   // Update profile functionality (this should send updated data to a backend)

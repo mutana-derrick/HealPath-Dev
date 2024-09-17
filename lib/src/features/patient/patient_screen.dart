@@ -27,7 +27,17 @@ class PatientScreen extends StatelessWidget {
             ),
           ),
           bottomNavigationBar: Container(
-            color: Colors.blue, // Background color for the nav bar
+            decoration: BoxDecoration(
+              color: Colors.blue, // Background color for the nav bar
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5), // Shadow color
+                  spreadRadius: 1, // Spread of the shadow
+                  blurRadius: 10, // Softness of the shadow
+                  offset: Offset(0, -3), // Position of the shadow (X,Y)
+                ),
+              ],
+            ),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               child: GNav(
