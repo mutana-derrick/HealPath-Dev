@@ -2,32 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class PatientProfileTab extends StatelessWidget {
-  const PatientProfileTab({super.key});
+  const PatientProfileTab({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<PatientProfileController>(
       init: PatientProfileController(),
       builder: (controller) {
-        return DefaultTabController(
-          length: 2,
-          child: Column(
+        return Scaffold(
+          body: Stack(
             children: [
-              const TabBar(
-                tabs: [
-                  Tab(text: 'Profile'),
-                  Tab(text: 'Appointments'),
+              Column(
+                children: [
+                  _buildHeader(context),
+                  Expanded(
+                    child: _buildProfileContent(controller),
+                  ),
                 ],
-                labelColor: Colors.blue,
-                unselectedLabelColor: Colors.grey,
               ),
-              Expanded(
-                child: TabBarView(
-                  children: [
-                    _buildProfileView(controller),
-                    _buildAppointmentsView(),
-                  ],
-                ),
+              Positioned(
+                top: 130,
+                left: 0,
+                right: 0,
+                child: _buildProfileImage(controller),
               ),
             ],
           ),
@@ -36,33 +33,74 @@ class PatientProfileTab extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileView(PatientProfileController controller) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildHeader(BuildContext context) {
+    return CustomPaint(
+      painter: HeaderCurvePainter(),
+      child: Container(
+        height: 180,
+        padding: EdgeInsets.only(bottom: 50),
+        alignment: Alignment.center,
+        child: Text(
+          'Profile',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.blue[900],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileImage(PatientProfileController controller) {
+    return Center(
+      child: Stack(
         children: [
-          Center(
+          CircleAvatar(
+            radius: 60,
+            backgroundColor: Colors.blue[900],
             child: CircleAvatar(
-              radius: 50,
-              backgroundColor: Colors.purple,
-              child: controller.profileImageUrl.isEmpty
-                  ? Text(
-                      controller.nameController.text[0],
-                      style: const TextStyle(fontSize: 40, color: Colors.white),
-                    )
-                  : null,
+              radius: 56,
+              backgroundColor: Colors.blue[100],
+              child: Text(
+                controller.nameController.text[0].toUpperCase(),
+                style: TextStyle(fontSize: 40, color: Colors.blue),
+              ),
             ),
           ),
-          const SizedBox(height: 20),
-          _buildInfoField('Name', controller.nameController.text),
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: CircleAvatar(
+              radius: 20,
+              backgroundColor: Colors.blue,
+              child: Icon(Icons.edit, color: Colors.blue[900], size: 20),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileContent(PatientProfileController controller) {
+    return SingleChildScrollView(
+      padding: EdgeInsets.only(top: 100, left: 20, right: 20),
+      child: Column(
+        children: [
+          _buildInfoField('Username', controller.username),
+          _buildInfoField('Full Name', controller.nameController.text),
           _buildInfoField('Email', controller.emailController.text),
-          _buildInfoField('Password', controller.passwordController.text),
-          const SizedBox(height: 20),
-          Center(
-            child: ElevatedButton(
-              onPressed: () => _showEditProfileDialog(controller),
-              child: const Text('Edit Profile'),
+          _buildInfoField('Emergency Contact', controller.emergencyContact),
+          SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () => _showEditProfileDialog(controller),
+            child: Text('Edit Profile', style: TextStyle(color: Colors.white)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(0),
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
             ),
           ),
         ],
@@ -71,22 +109,30 @@ class PatientProfileTab extends StatelessWidget {
   }
 
   Widget _buildInfoField(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      margin: EdgeInsets.only(bottom: 15),
+      padding: EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-          Text(value),
-          const Divider(),
+          Text(
+            label,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.black54,
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(color: Colors.black87),
+          ),
         ],
       ),
     );
-  }
-
-  Widget _buildAppointmentsView() {
-    // Placeholder for appointments view
-    return const Center(child: Text('Appointments View'));
   }
 
   void _showEditProfileDialog(PatientProfileController controller) {
@@ -94,22 +140,24 @@ class PatientProfileTab extends StatelessWidget {
       context: Get.context!,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Edit Profile'),
+          title: Text('Edit Profile'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
-                  decoration: const InputDecoration(labelText: 'Name'),
+                  decoration: InputDecoration(labelText: 'Name'),
                   controller: controller.nameController,
                 ),
                 TextField(
-                  decoration: const InputDecoration(labelText: 'Email'),
+                  decoration: InputDecoration(labelText: 'Email'),
                   controller: controller.emailController,
                 ),
                 TextField(
-                  decoration: const InputDecoration(labelText: 'Password'),
-                  controller: controller.passwordController,
+                  decoration: InputDecoration(labelText: 'Emergency Contact'),
+                  controller:
+                      TextEditingController(text: controller.emergencyContact),
+                  onChanged: (value) => controller.emergencyContact = value,
                 ),
               ],
             ),
@@ -117,14 +165,14 @@ class PatientProfileTab extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+              child: Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
                 controller.updateProfile();
                 Navigator.of(context).pop();
               },
-              child: const Text('Save'),
+              child: Text('Save'),
             ),
           ],
         );
@@ -133,13 +181,38 @@ class PatientProfileTab extends StatelessWidget {
   }
 }
 
+class HeaderCurvePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    var paint = Paint();
+    paint.color = Colors.blue;
+    paint.style = PaintingStyle.fill;
+
+    var path = Path();
+    path.moveTo(0, 0);
+    path.lineTo(0, size.height * 0.8);
+    path.quadraticBezierTo(
+      size.width / 2,
+      size.height,
+      size.width,
+      size.height * 0.8,
+    );
+    path.lineTo(size.width, 0);
+    path.close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
 class PatientProfileController extends GetxController {
   final nameController = TextEditingController();
   final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-
   String profileImageUrl = '';
   String emergencyContact = '';
+  String username = 'johndoe';
 
   @override
   void onInit() {
@@ -147,16 +220,12 @@ class PatientProfileController extends GetxController {
     // Fetch initial data (this would usually be from a backend)
     nameController.text = 'John Doe';
     emailController.text = 'john.doe@example.com';
-    passwordController.text = 'password';
+    emergencyContact = '+1 (555) 123-4567';
   }
 
-  // Update profile functionality (this should send updated data to a backend)
   void updateProfile() {
     // Here you would typically send the updated data to your backend
-    // For now, we'll just update the local state and show a success message
-    emergencyContact = emergencyContact;
-    update(); // This triggers a rebuild of the UI
-
+    update();
     Get.snackbar('Success', 'Profile updated successfully',
         snackPosition: SnackPosition.BOTTOM);
   }

@@ -206,18 +206,37 @@ class NotificationsList extends StatelessWidget {
   }
 }
 
-class PostCard extends StatelessWidget {
+class PostCard extends StatefulWidget {
   final Post post;
   final VoidCallback onTap;
 
   const PostCard({super.key, required this.post, required this.onTap});
 
   @override
+  _PostCardState createState() => _PostCardState();
+}
+
+class _PostCardState extends State<PostCard> {
+  late int likeCount;
+
+  @override
+  void initState() {
+    super.initState();
+    likeCount = widget.post.likes; // Initialize with the current like count
+  }
+
+  void _incrementLikes() {
+    setState(() {
+      likeCount++; // Increment like count
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
       child: InkWell(
-        onTap: onTap,
+        onTap: widget.onTap,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -226,34 +245,40 @@ class PostCard extends StatelessWidget {
               Row(
                 children: [
                   CircleAvatar(
-                    backgroundImage: NetworkImage(post.userProfilePicture),
+                    backgroundImage:
+                        NetworkImage(widget.post.userProfilePicture),
                   ),
                   const SizedBox(width: 8),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(post.userName,
+                      Text(widget.post.userName,
                           style: const TextStyle(fontWeight: FontWeight.bold)),
-                      Text(post.timestamp,
+                      Text(widget.post.timestamp,
                           style: const TextStyle(color: Colors.grey)),
                     ],
                   ),
                 ],
               ),
               const SizedBox(height: 8),
-              Text(post.content),
+              Text(widget.post.content),
               const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.thumb_up, color: Colors.blue, size: 16),
+                      IconButton(
+                        icon: const Icon(Icons.thumb_up,
+                            color: Colors.blue, size: 16),
+                        onPressed:
+                            _incrementLikes, // Increment like count on press
+                      ),
                       const SizedBox(width: 4),
-                      Text('${post.likes}'),
+                      Text('$likeCount'), // Display the updated like count
                     ],
                   ),
-                  Text('${post.comments.length} Comments'),
+                  Text('${widget.post.comments.length} Comments'),
                 ],
               ),
             ],
@@ -422,6 +447,58 @@ class _CommentsSheetState extends State<CommentsSheet> {
 
 class PatientCommunityController extends GetxController {
   List<Post> posts = [
+    Post(
+      userName: 'Dr. Mohamed Benar',
+      userProfilePicture:
+          'https://www.flaticon.com/free-icon/medical-assistance_4526826?related_id=4526826',
+      content:
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam vitae nibh id mauris condimentum volutis et sed enim.',
+      timestamp: 'March 15 · 14:30',
+      likes: 15,
+      comments: [
+        Comment(
+          content:
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam vitae nibh id mauris condi mentum volutis et sed enim.',
+          userName: 'Salahuddin',
+          userProfilePicture: 'https://example.com/salahuddin.jpg',
+          timestamp: '2h',
+        ),
+        Comment(
+          content:
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam vitae nibh id.',
+          userName: 'Aman Richman',
+          userProfilePicture: 'https://example.com/aman.jpg',
+          timestamp: '1h',
+        ),
+      ],
+    ),
+
+    Post(
+      userName: 'Dr. Mohamed Benar',
+      userProfilePicture:
+          'https://www.flaticon.com/free-icon/medical-assistance_4526826?related_id=4526826',
+      content:
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam vitae nibh id mauris condimentum volutis et sed enim.',
+      timestamp: 'March 15 · 14:30',
+      likes: 15,
+      comments: [
+        Comment(
+          content:
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam vitae nibh id mauris condi mentum volutis et sed enim.',
+          userName: 'Salahuddin',
+          userProfilePicture: 'https://example.com/salahuddin.jpg',
+          timestamp: '2h',
+        ),
+        Comment(
+          content:
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam vitae nibh id.',
+          userName: 'Aman Richman',
+          userProfilePicture: 'https://example.com/aman.jpg',
+          timestamp: '1h',
+        ),
+      ],
+    ),
+
     Post(
       userName: 'Dr. Mohamed Benar',
       userProfilePicture:
