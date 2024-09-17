@@ -9,17 +9,37 @@ class CommunityTab extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.all(16.0),
-          child: TextField(
-            decoration: InputDecoration(
-              hintText: 'Create a new post...',
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.send),
-                onPressed: () {
-                  // TODO: Implement post creation logic
-                },
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(20),
+          child: Container(
+            decoration: BoxDecoration(
+              color:
+                  Colors.white, // Background color for the TextField container
+              borderRadius: BorderRadius.circular(
+                  20), // Border radius to match the TextField
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5), // Shadow color
+                  spreadRadius: 2, // Spread of the shadow
+                  blurRadius: 8, // Softness of the shadow
+                  offset: Offset(0, 3), // X and Y offset of the shadow
+                ),
+              ],
+            ),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'Create a new post...',
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.send),
+                  onPressed: () {
+                    // TODO: Implement post creation logic
+                  },
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide
+                      .none, // Remove default border so it matches the shadow
+                ),
+                contentPadding:
+                    const EdgeInsets.all(16), // Inside padding of the TextField
               ),
             ),
           ),
@@ -136,8 +156,10 @@ class _InteractivePostCardState extends State<InteractivePostCard> {
           ListTile(
             leading: CircleAvatar(
               backgroundColor: Colors.blue,
-              child:
-                  Text(widget.author[0], style: const TextStyle(color: Colors.white),),
+              child: Text(
+                widget.author[0],
+                style: const TextStyle(color: Colors.white),
+              ),
             ),
             title: Text(widget.title,
                 style: const TextStyle(fontWeight: FontWeight.bold)),
