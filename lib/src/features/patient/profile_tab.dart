@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class PatientProfileTab extends StatelessWidget {
-  const PatientProfileTab({Key? key}) : super(key: key);
+  const PatientProfileTab({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,7 @@ class PatientProfileTab extends StatelessWidget {
       painter: HeaderCurvePainter(),
       child: Container(
         height: 180,
-        padding: EdgeInsets.only(bottom: 50),
+        padding: const EdgeInsets.only(bottom: 50),
         alignment: Alignment.center,
         child: Text(
           'Profile',
@@ -64,17 +64,22 @@ class PatientProfileTab extends StatelessWidget {
               backgroundColor: Colors.blue[100],
               child: Text(
                 controller.nameController.text[0].toUpperCase(),
-                style: TextStyle(fontSize: 40, color: Colors.blue),
+                style: const TextStyle(fontSize: 40, color: Colors.blue),
               ),
             ),
           ),
           Positioned(
             bottom: 0,
             right: 0,
-            child: CircleAvatar(
-              radius: 20,
-              backgroundColor: Colors.blue,
-              child: Icon(Icons.edit, color: Colors.blue[900], size: 20),
+            child: InkWell(
+              onTap: () {
+                _showEditProfileDialog(controller);
+              },
+              child: CircleAvatar(
+                radius: 20,
+                backgroundColor: Colors.blue,
+                child: Icon(Icons.edit, color: Colors.blue[900], size: 20),
+              ),
             ),
           ),
         ],
@@ -84,25 +89,14 @@ class PatientProfileTab extends StatelessWidget {
 
   Widget _buildProfileContent(PatientProfileController controller) {
     return SingleChildScrollView(
-      padding: EdgeInsets.only(top: 100, left: 20, right: 20),
+      padding: const EdgeInsets.only(top: 100, left: 20, right: 20),
       child: Column(
         children: [
           _buildInfoField('Username', controller.username),
           _buildInfoField('Full Name', controller.nameController.text),
           _buildInfoField('Email', controller.emailController.text),
           _buildInfoField('Emergency Contact', controller.emergencyContact),
-          SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () => _showEditProfileDialog(controller),
-            child: Text('Edit Profile', style: TextStyle(color: Colors.white)),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(0),
-              ),
-              padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-            ),
-          ),
+          const SizedBox(height: 20),
         ],
       ),
     );
@@ -110,8 +104,8 @@ class PatientProfileTab extends StatelessWidget {
 
   Widget _buildInfoField(String label, String value) {
     return Container(
-      margin: EdgeInsets.only(bottom: 15),
-      padding: EdgeInsets.all(15),
+      margin: const EdgeInsets.only(bottom: 15),
+      padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(10),
@@ -121,14 +115,14 @@ class PatientProfileTab extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               fontWeight: FontWeight.bold,
               color: Colors.black54,
             ),
           ),
           Text(
             value,
-            style: TextStyle(color: Colors.black87),
+            style: const TextStyle(color: Colors.black87),
           ),
         ],
       ),
@@ -140,21 +134,21 @@ class PatientProfileTab extends StatelessWidget {
       context: Get.context!,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Edit Profile'),
+          title: const Text('Edit Profile'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
-                  decoration: InputDecoration(labelText: 'Name'),
+                  decoration: const InputDecoration(labelText: 'Name'),
                   controller: controller.nameController,
                 ),
                 TextField(
-                  decoration: InputDecoration(labelText: 'Email'),
+                  decoration: const InputDecoration(labelText: 'Email'),
                   controller: controller.emailController,
                 ),
                 TextField(
-                  decoration: InputDecoration(labelText: 'Emergency Contact'),
+                  decoration: const InputDecoration(labelText: 'Emergency Contact'),
                   controller:
                       TextEditingController(text: controller.emergencyContact),
                   onChanged: (value) => controller.emergencyContact = value,
@@ -165,14 +159,14 @@ class PatientProfileTab extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
                 controller.updateProfile();
                 Navigator.of(context).pop();
               },
-              child: Text('Save'),
+              child: const Text('Save'),
             ),
           ],
         );

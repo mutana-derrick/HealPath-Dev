@@ -34,7 +34,7 @@ class PatientScreen extends StatelessWidget {
                   color: Colors.grey.withOpacity(0.5), // Shadow color
                   spreadRadius: 1, // Spread of the shadow
                   blurRadius: 10, // Softness of the shadow
-                  offset: Offset(0, -3), // Position of the shadow (X,Y)
+                  offset: const Offset(0, -3), // Position of the shadow (X,Y)
                 ),
               ],
             ),

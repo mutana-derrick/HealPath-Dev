@@ -20,7 +20,7 @@ class CommunityTab extends StatelessWidget {
                   color: Colors.grey.withOpacity(0.5), // Shadow color
                   spreadRadius: 2, // Spread of the shadow
                   blurRadius: 8, // Softness of the shadow
-                  offset: Offset(0, 3), // X and Y offset of the shadow
+                  offset: const Offset(0, 3), // X and Y offset of the shadow
                 ),
               ],
             ),

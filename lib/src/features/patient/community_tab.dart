@@ -26,7 +26,7 @@ class PatientCommunityTab extends StatelessWidget {
                       color: Colors.grey.withOpacity(0.5), // Shadow color
                       spreadRadius: 1, // How much the shadow spreads
                       blurRadius: 5, // Softness of the shadow
-                      offset: Offset(0, 3), // X and Y offset of the shadow
+                      offset: const Offset(0, 3), // X and Y offset of the shadow
                     ),
                   ],
                 ),
@@ -100,7 +100,7 @@ class SearchBarWithNotifications extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.blue,
       ),
       child: Row(
@@ -175,7 +175,7 @@ class NotificationsList extends StatelessWidget {
                       color: Colors.black.withOpacity(0.3), // Shadow color
                       spreadRadius: 3, // How much the shadow spreads
                       blurRadius: 10, // Softness of the shadow
-                      offset: Offset(0, 4), // X and Y offset of the shadow
+                      offset: const Offset(0, 4), // X and Y offset of the shadow
                     ),
                   ],
                 ),
@@ -194,7 +194,7 @@ class NotificationsList extends StatelessWidget {
                       child: Text('${index + 1}'),
                     ),
                     title: Text('Notification ${index + 1}'),
-                    subtitle: Text('This is a sample notification message.'),
+                    subtitle: const Text('This is a sample notification message.'),
                   );
                 },
               ),
@@ -356,7 +356,7 @@ class _CommentsSheetState extends State<CommentsSheet> {
                       color: Colors.black.withOpacity(0.3), // Shadow color
                       spreadRadius: 3, // How much the shadow spreads
                       blurRadius: 10, // Softness of the shadow
-                      offset: Offset(0, 4), // X and Y offset of the shadow
+                      offset: const Offset(0, 4), // X and Y offset of the shadow
                     ),
                   ],
                 ),
