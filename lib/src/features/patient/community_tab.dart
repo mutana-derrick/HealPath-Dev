@@ -420,7 +420,7 @@ class _CommentsSheetState extends State<CommentsSheet> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(20),
-                            borderSide: BorderSide(
+                            borderSide: const BorderSide(
                               color: Colors.blue,
                               width: 2.0,
                             ),
