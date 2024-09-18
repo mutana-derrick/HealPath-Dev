@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
-class SendNotificationTab extends StatelessWidget {
-  const SendNotificationTab({Key? key}) : super(key: key);
-
+class SendNotificationView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(

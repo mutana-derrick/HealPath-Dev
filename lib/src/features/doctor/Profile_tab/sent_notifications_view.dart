@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 
-class SentNotificationsTab extends StatelessWidget {
-  final List<Map<String, String>> sentNotifications;
-
-  const SentNotificationsTab({Key? key, required this.sentNotifications})
-      : super(key: key);
+class SentNotificationsView extends StatelessWidget {
+  final List<Map<String, String>> sentNotifications = [
+    {
+      'title': 'Reminder: Group Session',
+      'status': 'Approved',
+      'date': '2023-05-15'
+    },
+    {'title': 'New Article Posted', 'status': 'Pending', 'date': '2023-05-14'},
+    {'title': 'Schedule Change', 'status': 'Approved', 'date': '2023-05-13'},
+  ];
 
   @override
   Widget build(BuildContext context) {
