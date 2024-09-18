@@ -4,7 +4,7 @@ import 'package:healpath/src/features/doctor/bottom_navigation_bar.dart';
 import 'package:healpath/src/features/doctor/community_tab.dart';
 import 'package:healpath/src/features/doctor/overview_tab.dart';
 import 'package:healpath/src/features/doctor/patients_tab.dart';
-import 'package:healpath/src/features/doctor/profile_tab.dart';
+import 'package:healpath/src/features/doctor/Profile_tab/profile_tab.dart';
 import 'package:healpath/src/features/doctor/upper_bar.dart';
 
 class DoctorDashboardScreen extends StatefulWidget {
