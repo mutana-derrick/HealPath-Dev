@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:healpath/src/features/doctor/Patients/patient_modal.dart';
+import 'package:healpath/src/features/doctor/Patient_tab/patient_modal.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 void showAddPatientBottomSheet(
