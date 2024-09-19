@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:healpath/src/features/patient/Community_tab/models.dart';
+import 'package:healpath/src/features/patient/community_tab/models.dart';
 
 class PatientCommunityController extends GetxController {
   List<Post> posts = [

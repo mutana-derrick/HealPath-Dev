@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:healpath/src/features/doctor/Patient_tab/patiens_utilities.dart';
-import 'package:healpath/src/features/doctor/Patient_tab/patient_modal.dart';
+import 'package:healpath/src/features/doctor/patient_tab/patiens_utilities.dart';
+import 'package:healpath/src/features/doctor/patient_tab/patient_modal.dart';
 
 class PatientsTab extends StatefulWidget {
   const PatientsTab({super.key});

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_nav_bar/google_nav_bar.dart'; // Import the GNav package
-import 'package:healpath/src/features/patient/Community_tab/patient_community_tab.dart';
+import 'package:healpath/src/features/patient/community_tab/patient_community_tab.dart';
 import 'package:healpath/src/features/patient/emergency_tab.dart';
-import 'package:healpath/src/features/patient/profile_tab.dart';
+import 'package:healpath/src/features/patient/profile_tab/patient_profile_tab.dart';
 import 'package:healpath/src/features/patient/progress_tab.dart';
 
 class PatientScreen extends StatelessWidget {

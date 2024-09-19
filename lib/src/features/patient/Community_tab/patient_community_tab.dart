@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:healpath/src/features/patient/Community_tab/patient_community_controller.dart';
-import 'package:healpath/src/features/patient/Community_tab/widgets/comments_sheets.dart';
-import 'package:healpath/src/features/patient/Community_tab/models.dart';
+import 'package:healpath/src/features/patient/community_tab/patient_community_controller.dart';
+import 'package:healpath/src/features/patient/community_tab/widgets/comments_sheets.dart';
+import 'package:healpath/src/features/patient/community_tab/models.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'widgets/post_card.dart';
 import 'widgets/search_bar_with_notifications.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:healpath/src/features/patient/Community_tab/models.dart';
+import 'package:healpath/src/features/patient/community_tab/models.dart';
 
 class CommentsSheet extends StatefulWidget {
   final Post post;
