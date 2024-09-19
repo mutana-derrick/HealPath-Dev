@@ -34,7 +34,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 ProfileView(),
                 SendNotificationView(),
                 SentNotificationsView(),
-                const ReportView(),
+                 ReportView(),
               ],
             ),
           ),

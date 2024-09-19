@@ -4,12 +4,19 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:screenshot/screenshot.dart';
 import 'dart:io';
+import 'dart:typed_data';
 
 class ReportView extends StatelessWidget {
-  const ReportView({super.key});
+  final ScreenshotController _hivPrevalenceController = ScreenshotController();
+  final ScreenshotController _needleSharingController = ScreenshotController();
+  final ScreenshotController _drugPreferenceController = ScreenshotController();
+  final ScreenshotController _genderComparisonController = ScreenshotController();
 
-  @override
+  ReportView({super.key});
+
+ @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
@@ -24,11 +31,7 @@ class ReportView extends StatelessWidget {
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               ElevatedButton.icon(
-                style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all<Color>(Colors.blue),
-                  foregroundColor: WidgetStateProperty.all<Color>(Colors.white),
-                ),
-                onPressed: _saveReport,
+                onPressed: () => _saveReport(context),
                 icon: const Icon(Icons.save),
                 label: const Text('Save'),
               ),
@@ -37,13 +40,25 @@ class ReportView extends StatelessWidget {
           const SizedBox(height: 20),
           _buildSummaryCard(),
           const SizedBox(height: 20),
-          _buildHIVPrevalenceChart(),
+          Screenshot(
+            controller: _hivPrevalenceController, // Unique controller
+            child: _buildHIVPrevalenceChart(),
+          ),
           const SizedBox(height: 20),
-          _buildNeedleSharingChart(),
+          Screenshot(
+            controller: _needleSharingController, // Unique controller
+            child: _buildNeedleSharingChart(),
+          ),
           const SizedBox(height: 20),
-          _buildDrugPreferenceChart(),
+          Screenshot(
+            controller: _drugPreferenceController, // Unique controller
+            child: _buildDrugPreferenceChart(),
+          ),
           const SizedBox(height: 20),
-          _buildGenderComparisonChart(),
+          Screenshot(
+            controller: _genderComparisonController, // Unique controller
+            child: _buildGenderComparisonChart(),
+          ),
         ],
       ),
     );
@@ -326,39 +341,46 @@ class ReportView extends StatelessWidget {
     );
   }
 
-  Future<void> _saveReport() async {
-    final pdf = pw.Document();
+Future<void> _saveReport(BuildContext context) async {
+  final pdf = pw.Document();
 
-    pdf.addPage(
-      pw.MultiPage(
-        build: (context) => [
-          pw.Header(
-            level: 0,
-            child: pw.Text('PWID Treatment Report',
-                style:
-                    pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
-          ),
-          pw.SizedBox(height: 20),
-          _buildPdfSummary(),
-          pw.SizedBox(height: 20),
-          _buildPdfChart('HIV Prevalence'),
-          pw.SizedBox(height: 20),
-          _buildPdfChart('Needle Sharing Practices'),
-          pw.SizedBox(height: 20),
-          _buildPdfChart('Drug Preference (Past 6 months)'),
-          pw.SizedBox(height: 20),
-          _buildPdfChart('Gender Comparison'),
-        ],
-      ),
-    );
+  // Capture widget charts as images, check for null
+  final hivPrevalenceImage = await _hivPrevalenceController.capture();
+  final needleSharingImage = await _needleSharingController.capture();
+  final drugPreferenceImage = await _drugPreferenceController.capture();
+  final genderComparisonImage = await _genderComparisonController.capture();
 
-    final output = await getTemporaryDirectory();
-    final file = File('${output.path}/pwid_report.pdf');
-    await file.writeAsBytes(await pdf.save());
+  pdf.addPage(
+    pw.MultiPage(
+      build: (context) => [
+        pw.Header(
+          level: 0,
+          child: pw.Text('PWID Treatment Report',
+              style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+        ),
+        pw.SizedBox(height: 20),
+        _buildPdfSummary(),
+        pw.SizedBox(height: 20),
+        _buildPdfImageSection('HIV Prevalence', hivPrevalenceImage),
+        pw.SizedBox(height: 20),
+        _buildPdfImageSection('Needle Sharing Practices', needleSharingImage),
+        pw.SizedBox(height: 20),
+        _buildPdfImageSection('Drug Preference (Past 6 months)', drugPreferenceImage),
+        pw.SizedBox(height: 20),
+        _buildPdfImageSection('Gender Comparison', genderComparisonImage),
+      ],
+    ),
+  );
 
-    XFile xfile = XFile(file.path);
-    await Share.shareXFiles([xfile], text: 'PWID Treatment Report');
-  }
+  final output = await getTemporaryDirectory();
+  final file = File('${output.path}/pwid_report.pdf');
+  await file.writeAsBytes(await pdf.save());
+
+  XFile xfile = XFile(file.path);
+  await Share.shareXFiles([xfile], text: 'PWID Treatment Report');
+}
+
+}
 
   pw.Widget _buildPdfSummary() {
     return pw.Container(
@@ -412,4 +434,19 @@ class ReportView extends StatelessWidget {
       ),
     );
   }
+
+  pw.Widget _buildPdfImageSection(String title, Uint8List? image) {
+  return pw.Column(
+    crossAxisAlignment: pw.CrossAxisAlignment.start,
+    children: [
+      pw.Text(title, style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
+      pw.SizedBox(height: 10),
+      if (image != null)
+        pw.Image(pw.MemoryImage(image), height: 200)
+      else
+        pw.Text('Chart could not be rendered.'),
+    ],
+  );
 }
+
+
