@@ -28,13 +28,13 @@ class _ProfileTabState extends State<ProfileTab> {
             labelColor: Colors.blue,
             unselectedLabelColor: Colors.grey,
           ),
-          Expanded(
+          Expanded(                  
             child: TabBarView(
               children: [
                 ProfileView(),
                 SendNotificationView(),
                 SentNotificationsView(),
-                 ReportView(),
+                ReportView(),
               ],
             ),
           ),

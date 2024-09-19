@@ -11,6 +11,8 @@ class SentNotificationsView extends StatelessWidget {
     {'title': 'Schedule Change', 'status': 'Approved', 'date': '2023-05-13'},
   ];
 
+  SentNotificationsView({super.key});
+
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
@@ -25,7 +27,7 @@ class SentNotificationsView extends StatelessWidget {
               trailing: Chip(
                 label: Text(notification['status']!),
                 backgroundColor: notification['status'] == 'Approved'
-                    ? Colors.green
+                    ? Colors.blue
                     : Colors.orange,
               ),
             ),
