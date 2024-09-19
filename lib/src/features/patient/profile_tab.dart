@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class PatientProfileTab extends StatelessWidget {
   const PatientProfileTab({super.key});
@@ -24,7 +26,7 @@ class PatientProfileTab extends StatelessWidget {
                 top: 130,
                 left: 0,
                 right: 0,
-                child: _buildProfileImage(controller),
+                child: _buildProfileImage(controller, context),
               ),
             ],
           ),
@@ -52,7 +54,8 @@ class PatientProfileTab extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileImage(PatientProfileController controller) {
+  Widget _buildProfileImage(
+      PatientProfileController controller, BuildContext context) {
     return Center(
       child: Stack(
         children: [
@@ -73,7 +76,7 @@ class PatientProfileTab extends StatelessWidget {
             right: 0,
             child: InkWell(
               onTap: () {
-                _showEditProfileDialog(controller);
+                _showEditProfileBottomSheet(context, controller);
               },
               child: CircleAvatar(
                 radius: 20,
@@ -129,48 +132,187 @@ class PatientProfileTab extends StatelessWidget {
     );
   }
 
-  void _showEditProfileDialog(PatientProfileController controller) {
-    showDialog(
-      context: Get.context!,
+  void _showEditProfileBottomSheet(
+      BuildContext context, PatientProfileController controller) {
+    showCupertinoModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Edit Profile'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  decoration: const InputDecoration(labelText: 'Name'),
-                  controller: controller.nameController,
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setModalState) {
+            return Material(
+              child: SafeArea(
+                top: false,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return SingleChildScrollView(
+                      padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(context).viewInsets.bottom,
+                      ),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxHeight: constraints.maxHeight,
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              color: Colors.blue,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              child: const Center(
+                                child: Text(
+                                  'Edit Profile',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const Divider(height: 1, color: Colors.white),
+                            Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                children: [
+                                  _buildTextField(
+                                      'Name', controller.nameController),
+                                  _buildTextField(
+                                      'Email', controller.emailController),
+                                  _buildTextField('Emergency Contact',
+                                      controller.emergencyContact),
+                                  _buildTextField(
+                                      'Username', controller.username),
+                                  const SizedBox(height: 20),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      OutlinedButton(
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(),
+                                        style: OutlinedButton.styleFrom(
+                                          side: const BorderSide(
+                                              color: Colors.blue),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(0),
+                                          ),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 20, vertical: 12),
+                                        ),
+                                        child: const Text(
+                                          'Cancel',
+                                          style: TextStyle(color: Colors.blue),
+                                        ),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          controller.update();
+                                          _showSuccessSnackBar(context);
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.blue,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(0),
+                                          ),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 20, vertical: 12),
+                                        ),
+                                        child: const Text(
+                                          'Save Changes',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
-                TextField(
-                  decoration: const InputDecoration(labelText: 'Email'),
-                  controller: controller.emailController,
-                ),
-                TextField(
-                  decoration: const InputDecoration(labelText: 'Emergency Contact'),
-                  controller:
-                      TextEditingController(text: controller.emergencyContact),
-                  onChanged: (value) => controller.emergencyContact = value,
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                controller.updateProfile();
-                Navigator.of(context).pop();
-              },
-              child: const Text('Save'),
-            ),
-          ],
+              ),
+            );
+          },
         );
       },
+    );
+  }
+
+  Widget _buildTextField(String label, dynamic value) {
+    final TextEditingController textController =
+        TextEditingController(text: value.toString());
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+              ),
+            ),
+          ),
+          CupertinoTextField(
+            placeholder: 'Enter $label',
+            controller: textController,
+            onChanged: (value) {
+              // Update the controller value
+              switch (label.toLowerCase()) {
+                case 'name':
+                  value as TextEditingController;
+                  break;
+                case 'email':
+                  value as TextEditingController;
+                  break;
+                case 'emergency contact':
+                  value;
+                  break;
+                case 'username':
+                  value;
+                  break;
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSuccessSnackBar(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.blue[900]),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Profile updated successfully!',
+                style: TextStyle(color: Colors.blue[900]),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.lightBlue[100],
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        duration: const Duration(seconds: 3),
+      ),
     );
   }
 }
@@ -215,12 +357,5 @@ class PatientProfileController extends GetxController {
     nameController.text = 'John Doe';
     emailController.text = 'john.doe@example.com';
     emergencyContact = '+1 (555) 123-4567';
-  }
-
-  void updateProfile() {
-    // Here you would typically send the updated data to your backend
-    update();
-    Get.snackbar('Success', 'Profile updated successfully',
-        snackPosition: SnackPosition.BOTTOM);
   }
 }
