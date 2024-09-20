@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:healpath/src/features/doctor/bottom_navigation_bar.dart';
-import 'package:healpath/src/features/doctor/community_tab.dart';
+import 'package:healpath/src/features/doctor/community_tab/community_tab.dart';
 import 'package:healpath/src/features/doctor/overview_tab.dart';
 import 'package:healpath/src/features/doctor/patient_tab/patients_tab.dart';
 import 'package:healpath/src/features/doctor/profile_tab/profile_tab.dart';
