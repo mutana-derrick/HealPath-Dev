@@ -1,142 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:healpath/src/features/doctor/patient_tab/patient_modal.dart';
 
-// Function to show the add patient bottom sheet
-void showAddPatientBottomSheet(
-    BuildContext context, Function(String) showSnackBar) {
-  showCupertinoModalBottomSheet(
-    context: context,
-    backgroundColor: Colors.transparent,
-    builder: (BuildContext context) {
-      Map<String, String> patientInfo = {
-        'name': '',
-        'id': '',
-        'admissionDate': DateTime.now().toString().split(' ')[0],
-        'status': 'Active',
-      };
 
-      return StatefulBuilder(
-        builder: (BuildContext context, StateSetter setModalState) {
-          return Material(
-            child: SafeArea(
-              top: false,
-              child: Container(
-                constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height * 0.9,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.blue,
-                        borderRadius:
-                            BorderRadius.vertical(top: Radius.circular(20)),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'Add Patient',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: ListView(
-                        padding: const EdgeInsets.all(16),
-                        children: [
-                          ...patientInfo.keys.map((key) {
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 8),
-                                    child: Text(
-                                      key.capitalize(),
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ),
-                                  CupertinoTextField(
-                                    placeholder: 'Enter ${key.toLowerCase()}',
-                                    onChanged: (value) {
-                                      setModalState(() {
-                                        patientInfo[key] = value;
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),
-                            );
-                          }).toList(),
-                          const SizedBox(height: 20),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              OutlinedButton(
-                                onPressed: () => Navigator.of(context).pop(),
-                                style: OutlinedButton.styleFrom(
-                                  side: const BorderSide(color: Colors.blue),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20, vertical: 12),
-                                ),
-                                child: const Text(
-                                  'Cancel',
-                                  style: TextStyle(color: Colors.blue),
-                                ),
-                              ),
-                              ElevatedButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                  // TODO: Implement adding patient logic here
-                                  showSnackBar('Patient added successfully');
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.blue,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20, vertical: 12),
-                                ),
-                                child: const Text(
-                                  'Add Patient',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
-      );
-    },
-  );
-}
 
 // Function to view patient details
 void viewPatientDetails(
@@ -156,10 +22,10 @@ class PatientDetailsModal extends StatefulWidget {
   final Function(String) showSnackBar;
 
   const PatientDetailsModal({
-    Key? key,
+    super.key,
     required this.patient,
     required this.showSnackBar,
-  }) : super(key: key);
+  });
 
   @override
   _PatientDetailsModalState createState() => _PatientDetailsModalState();

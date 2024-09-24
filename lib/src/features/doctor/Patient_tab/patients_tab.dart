@@ -90,15 +90,6 @@ class _PatientsTabState extends State<PatientsTab>
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () =>
-              showAddPatientBottomSheet(context, _showSuccessSnackBar),
-          backgroundColor: Colors.blue[500],
-          child: Icon(
-            Icons.add,
-            color: Colors.blue[900],
-          ),
-        ),
       ),
     );
   }

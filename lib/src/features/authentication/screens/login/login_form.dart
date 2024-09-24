@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:healpath/src/features/authentication/screens/forgot_password/forgot_password_screen.dart';
 import 'package:healpath/src/features/doctor/doctor_dashboard.dart';
 
 class LoginForm extends StatelessWidget {
@@ -46,7 +47,10 @@ class LoginForm extends StatelessWidget {
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
-                  onPressed: () {}, child: const Text("Forget Password?")),
+                  onPressed: () {
+                    Get.to(() => const ForgotPasswordScreen());
+                  },
+                  child: const Text("Forget Password?")),
             ),
             const SizedBox(height: 10),
             // ------------Login button-------------------
@@ -54,7 +58,7 @@ class LoginForm extends StatelessWidget {
               width: double.infinity,
               height: 45,
               child: ElevatedButton(
-                  onPressed: () => Get.to(() => const DoctorDashboardScreen()), 
+                  onPressed: () => Get.to(() => const DoctorDashboardScreen()),
                   style: OutlinedButton.styleFrom(
                     shape: const RoundedRectangleBorder(),
                     foregroundColor: Colors.white,

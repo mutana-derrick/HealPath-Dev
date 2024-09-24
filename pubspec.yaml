@@ -23,6 +23,7 @@ dependencies:
   path_provider: ^2.0.15
   share_plus: ^10.0.2
   screenshot: ^3.0.0
+  flutter_otp_text_field: ^1.2.0
 
   
 
