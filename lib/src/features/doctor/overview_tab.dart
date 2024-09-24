@@ -7,14 +7,14 @@ class OverviewTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 2,
       child: Column(
         children: [
           const TabBar(
             tabs: [
-              Tab(text: 'Patient Stats'),
-              Tab(text: 'Treatment Progress'),
-              Tab(text: 'Recent Activity'),
+              Tab(text: 'Status'),
+              Tab(text: 'Progress'),
+              // Tab(text: 'Recent Activity'),
             ],
             labelColor: Colors.blue,
             unselectedLabelColor: Colors.grey,
@@ -24,7 +24,7 @@ class OverviewTab extends StatelessWidget {
               children: [
                 _buildPatientStats(),
                 _buildTreatmentProgress(),
-                _buildRecentActivity(),
+                // _buildRecentActivity(),
               ],
             ),
           ),

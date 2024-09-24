@@ -12,11 +12,12 @@ class ReportView extends StatelessWidget {
   final ScreenshotController _hivPrevalenceController = ScreenshotController();
   final ScreenshotController _needleSharingController = ScreenshotController();
   final ScreenshotController _drugPreferenceController = ScreenshotController();
-  final ScreenshotController _genderComparisonController = ScreenshotController();
+  final ScreenshotController _genderComparisonController =
+      ScreenshotController();
 
   ReportView({super.key});
 
- @override
+  @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
@@ -215,25 +216,17 @@ class ReportView extends StatelessWidget {
                   sections: [
                     PieChartSectionData(
                       color: Colors.red,
-                      value: 99,
-                      title: 'Heroin\n99%',
-                      radius: 50,
+                      value: 70,
+                      title: 'Heroin\n70%',
+                      radius: 60,
                       titleStyle: const TextStyle(
                           color: Colors.white, fontWeight: FontWeight.bold),
                     ),
                     PieChartSectionData(
                       color: Colors.blue,
-                      value: 10,
-                      title: 'Cocaine\n10%',
-                      radius: 50,
-                      titleStyle: const TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold),
-                    ),
-                    PieChartSectionData(
-                      color: Colors.green,
-                      value: 4,
-                      title: 'Meth\n4%',
-                      radius: 50,
+                      value: 30,
+                      title: 'Canabis\n30%',
+                      radius: 60,
                       titleStyle: const TextStyle(
                           color: Colors.white, fontWeight: FontWeight.bold),
                     ),
@@ -277,7 +270,7 @@ class ReportView extends StatelessWidget {
                             case 1:
                               return const Text('Selling sex');
                             case 2:
-                              return const Text('Needle sharing');
+                              return const Text('Needle');
                             default:
                               return const Text('');
                           }
@@ -341,105 +334,104 @@ class ReportView extends StatelessWidget {
     );
   }
 
-Future<void> _saveReport(BuildContext context) async {
-  final pdf = pw.Document();
+  Future<void> _saveReport(BuildContext context) async {
+    final pdf = pw.Document();
 
-  // Capture widget charts as images, check for null
-  final hivPrevalenceImage = await _hivPrevalenceController.capture();
-  final needleSharingImage = await _needleSharingController.capture();
-  final drugPreferenceImage = await _drugPreferenceController.capture();
-  final genderComparisonImage = await _genderComparisonController.capture();
+    // Capture widget charts as images, check for null
+    final hivPrevalenceImage = await _hivPrevalenceController.capture();
+    final needleSharingImage = await _needleSharingController.capture();
+    final drugPreferenceImage = await _drugPreferenceController.capture();
+    final genderComparisonImage = await _genderComparisonController.capture();
 
-  pdf.addPage(
-    pw.MultiPage(
-      build: (context) => [
-        pw.Header(
-          level: 0,
-          child: pw.Text('PWID Treatment Report',
-              style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
-        ),
-        pw.SizedBox(height: 20),
-        _buildPdfSummary(),
-        pw.SizedBox(height: 20),
-        _buildPdfImageSection('HIV Prevalence', hivPrevalenceImage),
-        pw.SizedBox(height: 20),
-        _buildPdfImageSection('Needle Sharing Practices', needleSharingImage),
-        pw.SizedBox(height: 20),
-        _buildPdfImageSection('Drug Preference (Past 6 months)', drugPreferenceImage),
-        pw.SizedBox(height: 20),
-        _buildPdfImageSection('Gender Comparison', genderComparisonImage),
+    pdf.addPage(
+      pw.MultiPage(
+        build: (context) => [
+          pw.Header(
+            level: 0,
+            child: pw.Text('PWID Treatment Report',
+                style:
+                    pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+          ),
+          pw.SizedBox(height: 20),
+          _buildPdfSummary(),
+          pw.SizedBox(height: 20),
+          _buildPdfImageSection('HIV Prevalence', hivPrevalenceImage),
+          pw.SizedBox(height: 20),
+          _buildPdfImageSection('Needle Sharing Practices', needleSharingImage),
+          pw.SizedBox(height: 20),
+          _buildPdfImageSection(
+              'Drug Preference (Past 6 months)', drugPreferenceImage),
+          pw.SizedBox(height: 20),
+          _buildPdfImageSection('Gender Comparison', genderComparisonImage),
+        ],
+      ),
+    );
+
+    final output = await getTemporaryDirectory();
+    final file = File('${output.path}/pwid_report.pdf');
+    await file.writeAsBytes(await pdf.save());
+
+    XFile xfile = XFile(file.path);
+    await Share.shareXFiles([xfile], text: 'PWID Treatment Report');
+  }
+}
+
+pw.Widget _buildPdfSummary() {
+  return pw.Container(
+    padding: const pw.EdgeInsets.all(10),
+    decoration: pw.BoxDecoration(
+      border: pw.Border.all(color: PdfColors.black),
+    ),
+    child: pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Text('Summary',
+            style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
+        pw.SizedBox(height: 10),
+        _buildPdfSummaryItem('Total PWID enrolled', '307'),
+        _buildPdfSummaryItem('HIV Prevalence', '9.5%'),
+        _buildPdfSummaryItem('Median Age', '28 years'),
+        _buildPdfSummaryItem('Male PWID', '81%'),
+        _buildPdfSummaryItem('Female PWID', '19%'),
       ],
     ),
   );
-
-  final output = await getTemporaryDirectory();
-  final file = File('${output.path}/pwid_report.pdf');
-  await file.writeAsBytes(await pdf.save());
-
-  XFile xfile = XFile(file.path);
-  await Share.shareXFiles([xfile], text: 'PWID Treatment Report');
 }
 
+pw.Widget _buildPdfSummaryItem(String label, String value) {
+  return pw.Row(
+    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+    children: [
+      pw.Text(label),
+      pw.Text(value, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+    ],
+  );
 }
 
-  pw.Widget _buildPdfSummary() {
-    return pw.Container(
-      padding: const pw.EdgeInsets.all(10),
-      decoration: pw.BoxDecoration(
-        border: pw.Border.all(color: PdfColors.black),
-      ),
-      child: pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: [
-          pw.Text('Summary',
-              style:
-                  pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
-          pw.SizedBox(height: 10),
-          _buildPdfSummaryItem('Total PWID enrolled', '307'),
-          _buildPdfSummaryItem('HIV Prevalence', '9.5%'),
-          _buildPdfSummaryItem('Median Age', '28 years'),
-          _buildPdfSummaryItem('Male PWID', '81%'),
-          _buildPdfSummaryItem('Female PWID', '19%'),
-        ],
-      ),
-    );
-  }
-
-  pw.Widget _buildPdfSummaryItem(String label, String value) {
-    return pw.Row(
-      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+pw.Widget _buildPdfChart(String title) {
+  return pw.Container(
+    padding: const pw.EdgeInsets.all(10),
+    decoration: pw.BoxDecoration(
+      border: pw.Border.all(color: PdfColors.black),
+    ),
+    child: pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.Text(label),
-        pw.Text(value, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+        pw.Text(title,
+            style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
+        pw.SizedBox(height: 10),
+        pw.Text('Chart placeholder - actual chart data would be included here'),
       ],
-    );
-  }
+    ),
+  );
+}
 
-  pw.Widget _buildPdfChart(String title) {
-    return pw.Container(
-      padding: const pw.EdgeInsets.all(10),
-      decoration: pw.BoxDecoration(
-        border: pw.Border.all(color: PdfColors.black),
-      ),
-      child: pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: [
-          pw.Text(title,
-              style:
-                  pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
-          pw.SizedBox(height: 10),
-          pw.Text(
-              'Chart placeholder - actual chart data would be included here'),
-        ],
-      ),
-    );
-  }
-
-  pw.Widget _buildPdfImageSection(String title, Uint8List? image) {
+pw.Widget _buildPdfImageSection(String title, Uint8List? image) {
   return pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
     children: [
-      pw.Text(title, style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
+      pw.Text(title,
+          style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
       pw.SizedBox(height: 10),
       if (image != null)
         pw.Image(pw.MemoryImage(image), height: 200)
@@ -448,5 +440,3 @@ Future<void> _saveReport(BuildContext context) async {
     ],
   );
 }
-
-

@@ -22,7 +22,7 @@ void showEditProfileBottomSheet(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      color: Colors.blue,
+                      color: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       child: const Center(
                         child: Text(
@@ -30,7 +30,7 @@ void showEditProfileBottomSheet(
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: Colors.grey,
                           ),
                         ),
                       ),
@@ -41,22 +41,15 @@ void showEditProfileBottomSheet(
                       child: Column(
                         children: [
                           _buildTextField('Name', controller.nameController),
-_buildTextField('Email', controller.emailController),
-_buildTextField('Emergency Contact', controller.emergencyContactController),  // Updated
-_buildTextField('Username', controller.usernameController),                   // Updated
+                          _buildTextField('Email', controller.emailController),
+                          _buildTextField('Emergency Contact',
+                              controller.emergencyContactController), // Updated
+                          _buildTextField('Username',
+                              controller.usernameController), // Updated
 
                           const SizedBox(height: 20),
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              OutlinedButton(
-                                onPressed: () => Navigator.of(context).pop(),
-                                style: OutlinedButton.styleFrom(
-                                  side: const BorderSide(color: Colors.blue),
-                                ),
-                                child: const Text('Cancel',
-                                    style: TextStyle(color: Colors.blue)),
-                              ),
                               ElevatedButton(
                                 onPressed: () {
                                   Navigator.of(context).pop();

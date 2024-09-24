@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:healpath/src/features/authentication/screens/login/login_footer.dart';
 import 'package:healpath/src/features/authentication/screens/login/login_form.dart';
 import 'package:healpath/src/features/authentication/screens/login/login_header.dart';
 
@@ -16,7 +15,7 @@ class LoginScreen extends StatelessWidget {
             height: MediaQuery.of(context).size.height,
             child: const Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [LoginHeader(), LoginForm(), LoginFooter()],
+              children: [LoginHeader(), LoginForm()],
             ),
           ),
         ),

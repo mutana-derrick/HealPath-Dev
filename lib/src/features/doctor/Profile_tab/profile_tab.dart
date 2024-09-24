@@ -21,14 +21,14 @@ class _ProfileTabState extends State<ProfileTab> {
           const TabBar(
             tabs: [
               Tab(text: 'Profile'),
-              Tab(text: 'Send Notification'),
-              Tab(text: 'Sent Notifications'),
+              Tab(text: 'Notify'),
+              Tab(text: 'Sent'),
               Tab(text: 'Report'),
             ],
             labelColor: Colors.blue,
             unselectedLabelColor: Colors.grey,
           ),
-          Expanded(                  
+          Expanded(
             child: TabBarView(
               children: [
                 ProfileView(),
