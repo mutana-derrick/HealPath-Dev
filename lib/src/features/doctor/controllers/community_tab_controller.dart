@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
-import '../models/post.dart';
-import '../models/comment.dart';
+import 'package:healpath/src/features/doctor/models/comment.dart';
+import 'package:healpath/src/features/doctor/models/post.dart';
+
 
 class CommunityTabController extends GetxController {
   List<Post> posts = [
