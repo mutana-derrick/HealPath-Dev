@@ -1,4 +1,4 @@
-package com.example.healpath
+package com.healpath.app
 
 import io.flutter.embedding.android.FlutterActivity
 
