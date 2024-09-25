@@ -17,7 +17,6 @@ class SignUpFooter extends StatelessWidget {
           height: 20,
         ),
         SizedBox(
-          height: 48,
           width: double.infinity,
           child: OutlinedButton.icon(
             onPressed: () {},

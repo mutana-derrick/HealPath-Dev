@@ -11,11 +11,14 @@ class SignUpHeader extends StatelessWidget {
       children: [
         Text(
           "Welcome To HealPath !",
-          style: Theme.of(context).textTheme.headlineSmall,
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
         ),
         Text(
           "SignUp",
-          style: Theme.of(context).textTheme.bodyLarge,
+          style: Theme.of(context).textTheme.headlineSmall,
         ),
       ],
     );

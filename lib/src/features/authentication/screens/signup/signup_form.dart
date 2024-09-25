@@ -1,9 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
 
-class SignUpForm extends StatelessWidget {
+class SignUpForm extends StatefulWidget {
   const SignUpForm({
     super.key,
   });
+
+  @override
+  State<SignUpForm> createState() => _SignUpFormState();
+}
+
+class _SignUpFormState extends State<SignUpForm> {
+  bool _isPasswordVisible = false;
+  String? _fileName;
+
+  Future<void> _pickFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    if (result != null) {
+      setState(() {
+        _fileName = result.files.single.name;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,16 +88,72 @@ class SignUpForm extends StatelessWidget {
             ),
             const SizedBox(height: 30),
 
+            // ------------File Upload Field-------------------
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  height: 50,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(0),
+                        ),
+                        child: IconButton(
+                          onPressed: _pickFile,
+                          icon: const Icon(Icons.upload_file),
+                          tooltip: "Choose File",
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 0),
+                          child: Text(
+                            _fileName ?? "Upload Discharge Summary",
+                            style: TextStyle(color: Colors.grey[600]),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  "This is a document that the hospital gave you when you left. It contains important information about your stay and any follow-up care.",
+                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                ),
+              ],
+            ),
+            const SizedBox(height: 30),
+
             // ------------Password Field-------------------
             SizedBox(
               height: 50,
               child: TextFormField(
-                decoration: const InputDecoration(
+                obscureText: !_isPasswordVisible,
+                decoration: InputDecoration(
                   labelText: "Password",
                   hintText: "password",
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
-                      onPressed: null, icon: Icon(Icons.remove_red_eye)),
+                    onPressed: () {
+                      setState(() {
+                        _isPasswordVisible = !_isPasswordVisible;
+                      });
+                    },
+                    icon: Icon(
+                      _isPasswordVisible
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                    ),
+                  ),
                 ),
               ),
             ),

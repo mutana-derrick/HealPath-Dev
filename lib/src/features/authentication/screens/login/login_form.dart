@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:healpath/src/features/authentication/screens/forgot_password/forgot_password_screen.dart';
-import 'package:healpath/src/features/doctor/doctor_dashboard.dart';
+import 'package:healpath/src/features/doctor/screens/doctor_dashboard.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({
