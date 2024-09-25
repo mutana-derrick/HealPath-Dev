@@ -3,10 +3,17 @@ import 'package:get/get.dart';
 import 'package:healpath/src/features/authentication/screens/forgot_password/forgot_password_screen.dart';
 import 'package:healpath/src/features/doctor/doctor_dashboard.dart';
 
-class LoginForm extends StatelessWidget {
+class LoginForm extends StatefulWidget {
   const LoginForm({
     super.key,
   });
+
+  @override
+  State<LoginForm> createState() => _LoginFormState();
+}
+
+class _LoginFormState extends State<LoginForm> {
+  bool _isPasswordVisible = false;
 
   @override
   Widget build(BuildContext context) {
@@ -33,12 +40,23 @@ class LoginForm extends StatelessWidget {
             SizedBox(
               height: 50,
               child: TextFormField(
-                decoration: const InputDecoration(
+                obscureText: !_isPasswordVisible,
+                decoration: InputDecoration(
                   labelText: "Password",
                   hintText: "password",
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
-                      onPressed: null, icon: Icon(Icons.remove_red_eye)),
+                    onPressed: () {
+                      setState(() {
+                        _isPasswordVisible = !_isPasswordVisible;
+                      });
+                    },
+                    icon: Icon(
+                      _isPasswordVisible
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -48,7 +66,7 @@ class LoginForm extends StatelessWidget {
               alignment: Alignment.centerRight,
               child: TextButton(
                   onPressed: () {
-                    Get.to(() => const ForgotPasswordScreen());
+                    Get.to(() => ForgotPasswordScreen());
                   },
                   child: const Text("Forget Password?")),
             ),

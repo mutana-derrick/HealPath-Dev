@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "988154331832",
+    "project_id": "healpath-b751e",
+    "storage_bucket": "healpath-b751e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:988154331832:android:a3434c50346883a6692a4d",
+        "android_client_info": {
+          "package_name": "com.healpath.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUM7hAbHceoWbUT4YJdobGRDG3_WrSftA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
