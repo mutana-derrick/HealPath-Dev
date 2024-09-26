@@ -8,6 +8,20 @@ class ForgotPasswordScreen extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
 
+  // Email validation function
+  String? _validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your email';
+    }
+    // Regular expression for validating an email
+    const emailPattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
+    final regex = RegExp(emailPattern);
+    if (!regex.hasMatch(value)) {
+      return 'Enter a valid email address';
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,7 +50,7 @@ class ForgotPasswordScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                " Please enter the email address associated with your account.",
+                "Please enter the email address associated with your account.",
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: Colors.black54,
                     ),
@@ -59,6 +73,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                           const BorderSide(color: Colors.blue, width: 2),
                     ),
                   ),
+                  validator: _validateEmail, // Added validation here
                 ),
               ),
               const SizedBox(height: 24),

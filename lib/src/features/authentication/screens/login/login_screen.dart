@@ -25,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Container(
           padding: const EdgeInsets.all(30.0),
           height: MediaQuery.of(context).size.height,
-          child: const Column(
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [LoginHeader(), LoginForm()],
           ),

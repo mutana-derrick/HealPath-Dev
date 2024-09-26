@@ -14,78 +14,88 @@ class LoginForm extends StatefulWidget {
 
 class _LoginFormState extends State<LoginForm> {
   bool _isPasswordVisible = false;
+  final _formKey = GlobalKey<FormState>();
+
 
   @override
   Widget build(BuildContext context) {
     return Form(
+      key: _formKey,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ------------Email Field-------------------
-            SizedBox(
-              height: 50,
-              child: TextFormField(
-                decoration: const InputDecoration(
-                  prefixIcon: Icon(Icons.email_outlined),
-                  labelText: "Email",
-                  hintText: "email",
-                  border: OutlineInputBorder(),
-                ),
+            // Email Field
+            TextFormField(
+              decoration: const InputDecoration(
+                prefixIcon: Icon(Icons.email_outlined),
+                labelText: "Email",
+                hintText: "email",
+                border: OutlineInputBorder(),
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 15, horizontal: 10),
               ),
+
             ),
             const SizedBox(height: 30),
-            // ------------Password Field-------------------
-            SizedBox(
-              height: 50,
-              child: TextFormField(
-                obscureText: !_isPasswordVisible,
-                decoration: InputDecoration(
-                  labelText: "Password",
-                  hintText: "password",
-                  border: const OutlineInputBorder(),
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        _isPasswordVisible = !_isPasswordVisible;
-                      });
-                    },
-                    icon: Icon(
-                      _isPasswordVisible
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                    ),
+
+            // Password Field
+            TextFormField(
+              obscureText: !_isPasswordVisible,
+              decoration: InputDecoration(
+                labelText: "Password",
+                hintText: "password",
+                border: const OutlineInputBorder(),
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+                suffixIcon: IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _isPasswordVisible = !_isPasswordVisible;
+                    });
+                  },
+                  icon: Icon(
+                    _isPasswordVisible
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
                   ),
                 ),
               ),
             ),
-            // ------------Forget Password-------------------
-            const SizedBox(height: 30),
+
+            // Forget Password
+            const SizedBox(height: 20),
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
-                  onPressed: () {
-                    Get.to(() => ForgotPasswordScreen());
-                  },
-                  child: const Text("Forget Password?")),
+                onPressed: () {
+                  Get.to(() => ForgotPasswordScreen());
+                },
+                child: const Text("Forget Password?"),
+              ),
             ),
             const SizedBox(height: 10),
-            // ------------Login button-------------------
+
+            // Login button
             SizedBox(
               width: double.infinity,
-              height: 45,
               child: ElevatedButton(
-                  onPressed: () => Get.to(() => const DoctorDashboardScreen()),
-                  style: OutlinedButton.styleFrom(
-                    shape: const RoundedRectangleBorder(),
-                    foregroundColor: Colors.white,
-                    backgroundColor: Colors.blue,
-                    side: const BorderSide(color: Colors.blue),
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                  ),
-                  child: const Text("LOGIN")),
-            )
+                onPressed: () {
+                 
+                    Get.to(() => const DoctorDashboardScreen());
+                  },
+                
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4)),
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.blue,
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                ),
+                child: const Text("LOGIN"),
+              ),
+            ),
           ],
         ),
       ),
