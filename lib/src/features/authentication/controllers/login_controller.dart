@@ -1,10 +1,13 @@
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:healpath/src/features/doctor/screens/doctor_dashboard.dart';
 import 'package:healpath/src/features/patient/screens/patient_screen.dart';
 
 class LoginController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   var isLoading = false.obs;
   var isPasswordVisible = false.obs;
@@ -13,14 +16,32 @@ class LoginController extends GetxController {
     try {
       isLoading(true);
 
-      // ignore: unused_local_variable
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
           email: email, password: password);
 
-      _showSnackBar("Success", "Logged in successfully!", true);
+      // Fetch user role from Firestore
+      DocumentSnapshot userDoc = await _firestore
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .get();
 
-      // Navigate to dashboard
-      Get.off(() => PatientScreen());
+      if (userDoc.exists) {
+        Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
+        String userRole = userData['role'] ?? '';
+
+        _showSnackBar("Success", "Logged in successfully!", true);
+
+        // Navigate based on user role
+        if (userRole == 'patient') {
+          Get.off(() => PatientScreen());
+        } else if (userRole == 'doctor') {
+          Get.off(() => DoctorDashboardScreen());
+        } else {
+          _showSnackBar("Error", "Invalid user role", false);
+        }
+      } else {
+        _showSnackBar("Error", "User data not found", false);
+      }
     } on FirebaseAuthException catch (e) {
       String errorMessage;
       if (e.code == 'user-not-found') {
