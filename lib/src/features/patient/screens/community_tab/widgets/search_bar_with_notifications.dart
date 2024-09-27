@@ -1,10 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:healpath/src/features/patient/screens/community_tab/widgets/circle_button.dart';
+import 'package:healpath/src/features/authentication/screens/login/login_screen.dart';
+import 'package:healpath/src/features/authentication/controllers/logout_controller.dart';
+import 'package:get/get.dart';
 
 class SearchBarWithNotifications extends StatelessWidget {
   final VoidCallback onNotificationTap;
 
-  const SearchBarWithNotifications({Key? key, required this.onNotificationTap})
-      : super(key: key);
+  SearchBarWithNotifications({super.key, required this.onNotificationTap}) {
+    // Lazy initialization of LogOutController
+    Get.lazyPut(() => LogOutController(), fenix: true);
+  }
+
+  void _handleLogout() async {
+    try {
+      final LogOutController logOutController = Get.find<LogOutController>();
+      await logOutController.signOut();
+      Get.offAll(() => LoginScreen());
+    } catch (e) {
+      Get.snackbar(
+        "Error",
+        "Failed to log out. Please try again.",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.black,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +61,12 @@ class SearchBarWithNotifications extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.notifications, color: Colors.blue.shade900),
             onPressed: onNotificationTap,
+          ),
+          CircleButton(
+            icon: Icons.logout, // Icon for logout
+            color: Colors.blue.shade900, // Icon color
+            backgroundColor: Colors.blue, // Button background color
+            onPressed: _handleLogout, // Action for logout button
           ),
         ],
       ),

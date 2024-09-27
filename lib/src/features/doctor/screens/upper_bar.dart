@@ -80,7 +80,6 @@ class UpperBar extends StatelessWidget {
               ),
               Column(
                 children: [
-                  // Notification button using CircleButton custom widget
                   CircleButton(
                     icon: Icons.logout, // Icon for logout
                     color: Colors.blue.shade900, // Icon color

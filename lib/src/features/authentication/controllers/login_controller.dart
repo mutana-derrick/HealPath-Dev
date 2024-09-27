@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:healpath/src/features/doctor/screens/doctor_dashboard.dart';
+import 'package:healpath/src/features/patient/screens/patient_screen.dart';
 
 class LoginController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -20,7 +20,7 @@ class LoginController extends GetxController {
       _showSnackBar("Success", "Logged in successfully!", true);
 
       // Navigate to dashboard
-      Get.off(() => DoctorDashboardScreen());
+      Get.off(() => PatientScreen());
     } on FirebaseAuthException catch (e) {
       String errorMessage;
       if (e.code == 'user-not-found') {
