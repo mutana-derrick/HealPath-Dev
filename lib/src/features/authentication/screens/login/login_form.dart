@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:healpath/src/features/authentication/screens/forgot_password/forgot_password_screen.dart';
-import 'package:healpath/src/features/doctor/screens/doctor_dashboard.dart';
+import 'package:healpath/src/features/authentication/controllers/login_controller.dart';
 
 class LoginForm extends StatefulWidget {
-  const LoginForm({
-    super.key,
-  });
+  const LoginForm({super.key});
 
   @override
   State<LoginForm> createState() => _LoginFormState();
 }
 
 class _LoginFormState extends State<LoginForm> {
-  bool _isPasswordVisible = false;
-  final _formKey = GlobalKey<FormState>();
+  final LoginController controller = Get.put(LoginController());
 
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  final TextEditingController _emailController = TextEditingController();
+  // ignore: unused_field
+  String _email = '';
+
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -26,8 +30,8 @@ class _LoginFormState extends State<LoginForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Email Field
             TextFormField(
+              controller: _emailController,
               decoration: const InputDecoration(
                 prefixIcon: Icon(Icons.email_outlined),
                 labelText: "Email",
@@ -36,35 +40,36 @@ class _LoginFormState extends State<LoginForm> {
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 15, horizontal: 10),
               ),
-
+              validator: (value) =>
+                  !value!.contains('@') ? "Enter a valid email" : null,
+              onSaved: (value) => _email = value!,
             ),
             const SizedBox(height: 30),
-
-            // Password Field
-            TextFormField(
-              obscureText: !_isPasswordVisible,
-              decoration: InputDecoration(
-                labelText: "Password",
-                hintText: "password",
-                border: const OutlineInputBorder(),
-                contentPadding:
-                    EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-                suffixIcon: IconButton(
-                  onPressed: () {
-                    setState(() {
-                      _isPasswordVisible = !_isPasswordVisible;
-                    });
-                  },
-                  icon: Icon(
-                    _isPasswordVisible
-                        ? Icons.visibility_outlined
-                        : Icons.visibility_off_outlined,
+            Obx(() => TextFormField(
+                  controller: _passwordController,
+                  obscureText: !controller.isPasswordVisible.value,
+                  decoration: InputDecoration(
+                    labelText: "Password",
+                    hintText: "password",
+                    border: const OutlineInputBorder(),
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+                    suffixIcon: IconButton(
+                      onPressed: controller.togglePasswordVisibility,
+                      icon: Icon(
+                        controller.isPasswordVisible.value
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ),
-
-            // Forget Password
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your password';
+                    }
+                    return null;
+                  },
+                )),
             const SizedBox(height: 20),
             Align(
               alignment: Alignment.centerRight,
@@ -76,25 +81,41 @@ class _LoginFormState extends State<LoginForm> {
               ),
             ),
             const SizedBox(height: 10),
-
-            // Login button
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                 
-                    Get.to(() => const DoctorDashboardScreen());
-                  },
-                
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4)),
-                  foregroundColor: Colors.white,
-                  backgroundColor: Colors.blue,
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                ),
-                child: const Text("LOGIN"),
-              ),
+              child: Obx(() => ElevatedButton(
+                    onPressed: controller.isLoading.value
+                        ? () {} // Empty function to keep the button enabled
+                        : () {
+                            if (_formKey.currentState!.validate()) {
+                              controller.login(
+                                _emailController.text,
+                                _passwordController.text,
+                              );
+                            }
+                          },
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4)),
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.blue,
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      // Disable the splash effect when loading
+                      splashFactory: controller.isLoading.value
+                          ? NoSplash.splashFactory
+                          : InkSplash.splashFactory,
+                    ),
+                    child: controller.isLoading.value
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text("LOGIN"),
+                  )),
             ),
           ],
         ),

@@ -30,8 +30,9 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       // Upper bar at the top of the screen
-      appBar: const PreferredSize(
-        preferredSize: Size.fromHeight(160.0), // Adjust the height as needed
+      appBar: PreferredSize(
+        preferredSize:
+            const Size.fromHeight(160.0), // Adjust the height as needed
         child: UpperBar(),
       ),
       body: Obx(

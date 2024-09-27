@@ -1,9 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:healpath/src/features/authentication/controllers/logout_controller.dart';
+import 'package:healpath/src/features/authentication/screens/login/login_screen.dart';
 import 'package:intl/intl.dart'; // For date formatting
 import 'package:healpath/src/features/doctor/screens/circle_button.dart'; // Custom CircleButton widget
+import 'package:get/get.dart';
 
 class UpperBar extends StatelessWidget {
-  const UpperBar({super.key});
+  UpperBar({super.key}) {
+    // Lazy initialization of LogOutController
+    Get.lazyPut(() => LogOutController(), fenix: true);
+  }
+
+  void _handleLogout() async {
+    try {
+      final LogOutController logOutController = Get.find<LogOutController>();
+      await logOutController.signOut();
+      Get.offAll(() => LoginScreen());
+    } catch (e) {
+      Get.snackbar(
+        "Error",
+        "Failed to log out. Please try again.",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.black,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,12 +82,11 @@ class UpperBar extends StatelessWidget {
                 children: [
                   // Notification button using CircleButton custom widget
                   CircleButton(
-                    icon: Icons.notifications, // Icon for notifications
+                    icon: Icons.logout, // Icon for logout
                     color: Colors.blue.shade900, // Icon color
                     backgroundColor:
                         Colors.blue.shade400, // Button background color
-                    onPressed:
-                        () {}, // Action for notification button (currently empty)
+                    onPressed: _handleLogout, // Action for logout button
                   ),
                   const SizedBox(height: 8), // Space between button and date
                   // Dynamic date text to display the formatted current date
