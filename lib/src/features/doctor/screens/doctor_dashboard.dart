@@ -20,10 +20,10 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
 
   // List of content widgets corresponding to each tab
   final List<Widget> _pages = [
-    const OverviewTab(),
-    const PatientsTab(),
-    const CommunityTab(),
-    const ProfileTab(),
+    OverviewTab(),
+    PatientsTab(),
+    CommunityTab(),
+    ProfileTab(),
   ];
 
   @override

@@ -47,7 +47,7 @@ class LoginController extends GetxController {
       if (e.code == 'user-not-found') {
         errorMessage = 'No user found for that email.';
       } else if (e.code == 'wrong-password') {
-        errorMessage = 'Wrong password provided for that user.';
+        errorMessage = 'Wrong credentials.';
       } else {
         errorMessage = e.message ?? 'An error occurred. Please try again.';
       }

@@ -1,46 +1,60 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get.dart';
 import 'package:healpath/src/features/doctor/screens/patient_tab/patiens_utilities.dart';
 import 'package:healpath/src/features/doctor/models/patient_model.dart';
 
-class PatientsTab extends StatefulWidget {
-  const PatientsTab({super.key});
+class PatientsController extends GetxController {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  RxList<Patient> patients = <Patient>[].obs;
+  RxBool isLoading = true.obs;
+  RxString errorMessage = ''.obs;
 
   @override
-  _PatientsTabState createState() => _PatientsTabState();
+  void onInit() {
+    super.onInit();
+    fetchPatients();
+  }
+
+  Future<void> fetchPatients() async {
+    isLoading.value = true;
+    errorMessage.value = '';
+    try {
+      QuerySnapshot snapshot = await _firestore.collection('patients').get();
+      patients.value = snapshot.docs.map((doc) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        return Patient(
+          name: data['name'] ?? '',
+          id: doc.id,
+          status: data['status'] ?? 'Active',
+          admissionDate: data['admissionDate'] ?? '',
+        );
+      }).toList();
+    } catch (e) {
+      errorMessage.value = 'Error fetching patients: $e';
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> togglePatientStatus(Patient patient) async {
+    try {
+      String newStatus = patient.status == 'Active' ? 'Archived' : 'Active';
+      await _firestore.collection('patients').doc(patient.id).update({
+        'status': newStatus,
+      });
+      patient.status = newStatus;
+      patients.refresh();
+    } catch (e) {
+      errorMessage.value = 'Error updating patient status: $e';
+    }
+  }
 }
 
-class _PatientsTabState extends State<PatientsTab>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  List<Patient> patients = [
-    Patient(
-        name: "John Doe",
-        id: "P001",
-        status: "Active",
-        admissionDate: "2023-01-15"),
-    Patient(
-        name: "Jane Smith",
-        id: "P002",
-        status: "Active",
-        admissionDate: "2023-02-20"),
-    Patient(
-        name: "Mike Johnson",
-        id: "P003",
-        status: "Archived",
-        admissionDate: "2022-11-10"),
-  ];
+class PatientsTab extends StatelessWidget {
+  final PatientsController controller = Get.put(PatientsController());
 
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
+   PatientsTab({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -54,8 +68,8 @@ class _PatientsTabState extends State<PatientsTab>
                 Tab(text: 'Active'),
                 Tab(text: 'Archived'),
               ],
-              labelColor: Colors.blue, // Adjust color as needed
-              unselectedLabelColor: Colors.grey, // Adjust color as needed
+              labelColor: Colors.blue,
+              unselectedLabelColor: Colors.grey,
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -81,11 +95,22 @@ class _PatientsTabState extends State<PatientsTab>
               ),
             ),
             Expanded(
-              child: TabBarView(
-                children: [
-                  _buildPatientList('Active'),
-                  _buildPatientList('Archived'),
-                ],
+              child: RefreshIndicator(
+                onRefresh: controller.fetchPatients,
+                child: Obx(() {
+                  if (controller.isLoading.value) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (controller.errorMessage.isNotEmpty) {
+                    return Center(child: Text(controller.errorMessage.value));
+                  } else {
+                    return TabBarView(
+                      children: [
+                        _buildPatientList('Active'),
+                        _buildPatientList('Archived'),
+                      ],
+                    );
+                  }
+                }),
               ),
             ),
           ],
@@ -95,17 +120,19 @@ class _PatientsTabState extends State<PatientsTab>
   }
 
   Widget _buildPatientList(String status) {
-    List<Patient> filteredPatients =
-        patients.where((p) => p.status == status).toList();
-    return ListView.builder(
-      itemCount: filteredPatients.length,
-      itemBuilder: (context, index) {
-        return _buildPatientCard(filteredPatients[index]);
-      },
-    );
+    return Obx(() {
+      List<Patient> filteredPatients =
+          controller.patients.where((p) => p.status == status).toList();
+      return ListView.builder(
+        itemCount: filteredPatients.length,
+        itemBuilder: (context, index) {
+          return _buildPatientCard(context, filteredPatients[index]);
+        },
+      );
+    });
   }
 
-  Widget _buildPatientCard(Patient patient) {
+  Widget _buildPatientCard(BuildContext context, Patient patient) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: ListTile(
@@ -125,11 +152,13 @@ class _PatientsTabState extends State<PatientsTab>
                 )),
             const SizedBox(width: 8),
             PopupMenuButton<String>(
-              onSelected: (value) {
+              onSelected: (value) async {
                 if (value == 'toggle') {
-                  _togglePatientStatus(patient);
+                  await controller.togglePatientStatus(patient);
                 } else if (value == 'view') {
-                  viewPatientDetails(context, patient, _showSuccessSnackBar);
+                  viewPatientDetails(context, patient, (message) {
+                    showSuccessSnackBar(context, message);
+                  });
                 }
               },
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
@@ -148,16 +177,5 @@ class _PatientsTabState extends State<PatientsTab>
         ),
       ),
     );
-  }
-
-  void _togglePatientStatus(Patient patient) {
-    setState(() {
-      patient.status = patient.status == 'Active' ? 'Archived' : 'Active';
-    });
-    _showSuccessSnackBar('Patient status updated successfully');
-  }
-
-  void _showSuccessSnackBar(String message) {
-    showSuccessSnackBar(context, message);
   }
 }

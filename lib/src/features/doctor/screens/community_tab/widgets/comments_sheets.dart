@@ -1,20 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../../models/post.dart';
 import '../../../models/comment.dart';
 import 'comment_card.dart';
 
-
-class CommentsSheet extends StatefulWidget {
+class CommentsSheet extends StatelessWidget {
   final Post post;
 
   const CommentsSheet({super.key, required this.post});
-
-  @override
-  _CommentsSheetState createState() => _CommentsSheetState();
-}
-
-class _CommentsSheetState extends State<CommentsSheet> {
-  final TextEditingController _commentController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -23,28 +17,51 @@ class _CommentsSheetState extends State<CommentsSheet> {
         top: false,
         child: Column(
           children: [
-            _buildAppBar(),
+            _buildAppBar(context),
             Expanded(
-  child: ListView(
-    children: [
-      Padding(
-        padding: const EdgeInsets.all(16),
-        child: Text(widget.post.content),
-      ),
-      ...widget.post.comments.map((comment) => CommentCard(comment: comment)).toList(),
-    ],
-  ),
-),
-            _buildCommentInput(),
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('posts')
+                    .doc(post.id)
+                    .collection('comments')
+                    .orderBy('timestamp', descending: true)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  }
+
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final comments = snapshot.data!.docs
+    .map((doc) => Comment.fromFirestore(doc))  // Map each doc to a Comment object
+    .toList();
+
+return ListView(
+  children: [
+    Padding(
+      padding: const EdgeInsets.all(16),
+      child: Text(post.content),
+    ),
+    ...comments.map((comment) => CommentCard(comment: comment)).toList(),
+  ],
+);
+
+                },
+              ),
+            ),
+            _buildCommentInput(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildAppBar() {
+  Widget _buildAppBar(BuildContext context) {
     return AppBar(
-      title: Text('${widget.post.userName}\'s Post'),
+      title: Text('${post.userName}\'s Post'),
       backgroundColor: Colors.blue,
       elevation: 1,
       flexibleSpace: Container(),
@@ -55,7 +72,9 @@ class _CommentsSheetState extends State<CommentsSheet> {
     );
   }
 
-  Widget _buildCommentInput() {
+  Widget _buildCommentInput(BuildContext context) {
+    final TextEditingController _commentController = TextEditingController();
+
     return Container(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -78,7 +97,7 @@ class _CommentsSheetState extends State<CommentsSheet> {
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.send),
                     color: Colors.blue,
-                    onPressed: _addComment,
+                    onPressed: () => _addComment(context, _commentController),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20),
@@ -96,23 +115,22 @@ class _CommentsSheetState extends State<CommentsSheet> {
     );
   }
 
-  void _addComment() {
-    if (_commentController.text.isNotEmpty) {
-      setState(() {
-        widget.post.comments.add(Comment(
-          content: _commentController.text,
-          userName: 'Current User', // Replace with actual user name
-          userProfilePicture: 'https://example.com/user.jpg', // Replace with actual user profile picture
-          timestamp: 'Just now',
-        ));
-        _commentController.clear();
-      });
+  void _addComment(BuildContext context, TextEditingController controller) async {
+    if (controller.text.isNotEmpty) {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await FirebaseFirestore.instance
+            .collection('posts')
+            .doc(post.id)
+            .collection('comments')
+            .add({
+          'content': controller.text,
+          'userName': user.displayName ?? 'Anonymous',
+          'userProfilePicture': user.photoURL ?? 'https://example.com/default.jpg',
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+        controller.clear();
+      }
     }
-  }
-
-  @override
-  void dispose() {
-    _commentController.dispose();
-    super.dispose();
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:healpath/src/features/doctor/controllers/prrofile_controller.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class ProfileView extends StatefulWidget {
@@ -10,16 +11,41 @@ class ProfileView extends StatefulWidget {
 }
 
 class _ProfileViewState extends State<ProfileView> {
-  Map<String, String> doctorInfo = {
-    'name': 'Dr. John Smith',
-    'email': 'john.smith@example.com',
-    'specialization': 'Addiction Specialist',
-    'license': 'ABC123456',
-    'phone': '+1 (555) 123-4567',
-  };
+  final ProfileController _profileController = ProfileController();
+  Map<String, dynamic> userInfo = {};
+  bool _isLoading = true;
+  Map<String, TextEditingController> _controllers = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserInfo();
+  }
+
+  Future<void> _fetchUserInfo() async {
+    setState(() => _isLoading = true);
+    Map<String, dynamic>? fetchedData =
+        await _profileController.fetchUserInfo();
+    if (fetchedData != null) {
+      setState(() {
+        userInfo = {
+          'fullName': fetchedData['fullName'] ?? '',
+          'email': fetchedData['email'] ?? '',
+          'specialization': fetchedData['specialization'] ?? '',
+          'phoneNumber': fetchedData['phoneNumber'] ?? '',
+          'profilePicture': fetchedData['profilePicture'] ?? '',
+        };
+      });
+    }
+    setState(() => _isLoading = false);
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -30,15 +56,23 @@ class _ProfileViewState extends State<ProfileView> {
               children: [
                 CircleAvatar(
                   radius: 60,
-                  backgroundColor: Colors.blue[900],
-                  child: CircleAvatar(
-                    radius: 56,
-                    backgroundColor: Colors.blue[100],
-                    child: Text(
-                      doctorInfo['name']![0],
-                      style: TextStyle(fontSize: 40, color: Colors.blue[900]),
-                    ),
-                  ),
+                  backgroundColor: Colors.blue[100],
+                  child: userInfo['profilePicture']?.isNotEmpty == true
+                      ? ClipOval(
+                          child: Image.network(
+                            userInfo['profilePicture'],
+                            width: 120,
+                            height: 120,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : Text(
+                          userInfo['fullName']?.isNotEmpty == true
+                              ? userInfo['fullName']![0].toUpperCase()
+                              : '?',
+                          style:
+                              TextStyle(fontSize: 40, color: Colors.blue[900]),
+                        ),
                 ),
                 Positioned(
                   bottom: 0,
@@ -48,7 +82,7 @@ class _ProfileViewState extends State<ProfileView> {
                     child: Container(
                       padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
-                        color: Colors.blue,
+                        color: Colors.white,
                         shape: BoxShape.circle,
                         border: Border.all(color: Colors.blue, width: 2),
                       ),
@@ -61,7 +95,8 @@ class _ProfileViewState extends State<ProfileView> {
             ),
           ),
           const SizedBox(height: 24),
-          ...doctorInfo.entries
+          ...userInfo.entries
+              .where((entry) => entry.key != 'profilePicture')
               .map((entry) => _buildInfoField(entry.key, entry.value))
               .toList(),
         ],
@@ -81,7 +116,7 @@ class _ProfileViewState extends State<ProfileView> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            label,
+            label.capitalize(),
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               color: Colors.black54,
@@ -97,6 +132,12 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   void _showEditProfileBottomSheet() {
+    userInfo.forEach((key, value) {
+      if (key != 'email' && key != 'profilePicture') {
+        _controllers[key] = TextEditingController(text: value);
+      }
+    });
+
     showCupertinoModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -109,7 +150,6 @@ class _ProfileViewState extends State<ProfileView> {
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     return SingleChildScrollView(
-                      // Adjust bottom padding to avoid being hidden by the keyboard
                       padding: EdgeInsets.only(
                         bottom: MediaQuery.of(context).viewInsets.bottom,
                       ),
@@ -120,7 +160,6 @@ class _ProfileViewState extends State<ProfileView> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Title Section
                             Container(
                               color: Colors.blue,
                               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -136,20 +175,15 @@ class _ProfileViewState extends State<ProfileView> {
                               ),
                             ),
                             const Divider(height: 1, color: Colors.white),
-
-                            // Form Section
                             Padding(
                               padding: const EdgeInsets.all(16),
                               child: Column(
                                 children: [
-                                  // Dynamically generating the TextFields based on doctorInfo keys
-                                  ...doctorInfo.keys.map((key) {
-                                    // Create a TextEditingController for each key
-                                    TextEditingController controller =
-                                        TextEditingController(
-                                      text: doctorInfo[key], // Set initial text
-                                    );
-
+                                  ...userInfo.entries
+                                      .where((entry) =>
+                                          entry.key != 'email' &&
+                                          entry.key != 'profilePicture')
+                                      .map((entry) {
                                     return Padding(
                                       padding:
                                           const EdgeInsets.only(bottom: 16),
@@ -161,7 +195,7 @@ class _ProfileViewState extends State<ProfileView> {
                                             padding: const EdgeInsets.only(
                                                 bottom: 8),
                                             child: Text(
-                                              key.capitalize(),
+                                              entry.key.capitalize(),
                                               style: const TextStyle(
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.bold,
@@ -170,14 +204,10 @@ class _ProfileViewState extends State<ProfileView> {
                                             ),
                                           ),
                                           CupertinoTextField(
-                                            placeholder:
-                                                'Enter ${key.toLowerCase()}',
-                                            controller:
-                                                controller, // Set controller
+                                            controller: _controllers[entry.key],
                                             onChanged: (value) {
                                               setModalState(() {
-                                                doctorInfo[key] =
-                                                    value; // Update value when changed
+                                                userInfo[entry.key] = value;
                                               });
                                             },
                                           ),
@@ -186,23 +216,16 @@ class _ProfileViewState extends State<ProfileView> {
                                     );
                                   }).toList(),
                                   const SizedBox(height: 20),
-
-                                  // Action Buttons
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      // Cancel Button
                                       OutlinedButton(
                                         onPressed: () =>
                                             Navigator.of(context).pop(),
                                         style: OutlinedButton.styleFrom(
                                           side: const BorderSide(
                                               color: Colors.blue),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(0),
-                                          ),
                                           padding: const EdgeInsets.symmetric(
                                               horizontal: 20, vertical: 12),
                                         ),
@@ -211,19 +234,13 @@ class _ProfileViewState extends State<ProfileView> {
                                           style: TextStyle(color: Colors.blue),
                                         ),
                                       ),
-
-                                      // Save Button
                                       ElevatedButton(
                                         onPressed: () {
+                                          _updateUserInfo();
                                           Navigator.of(context).pop();
-                                          _showSuccessSnackBar();
                                         },
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: Colors.blue,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(0),
-                                          ),
                                           padding: const EdgeInsets.symmetric(
                                               horizontal: 20, vertical: 12),
                                         ),
@@ -251,41 +268,39 @@ class _ProfileViewState extends State<ProfileView> {
     );
   }
 
+  Future<void> _updateUserInfo() async {
+    await _profileController.updateUserInfo(userInfo);
+    await _fetchUserInfo(); // Re-fetch user info to reflect updated data
+    _showSuccessSnackBar();
+  }
+
   void _showSuccessSnackBar() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.blue[900]),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'Profile updated successfully!',
-                style: TextStyle(color: Colors.blue[900]),
-              ),
-            ),
+          children: const [
+            Icon(Icons.check_circle, color: Colors.green),
+            SizedBox(width: 10),
+            Text('Profile updated successfully!'),
           ],
         ),
-        backgroundColor: Colors.lightBlue[100],
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        animation: CurvedAnimation(
-          parent: AnimationController(
-            vsync: ScaffoldMessenger.of(context),
-            duration: const Duration(milliseconds: 500),
-          )..forward(),
-          curve: Curves.easeOutCubic,
-        ),
-        duration: const Duration(seconds: 3),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _controllers.forEach((key, controller) {
+      controller
+          .dispose(); // Dispose each TextEditingController to avoid memory leaks
+    });
+    super.dispose(); // Ensure to call the parent class's dispose method
   }
 }
 
 extension StringExtension on String {
   String capitalize() {
-    return "${this[0].toUpperCase()}${substring(1)}";
+    if (isEmpty) return this;
+    return '${this[0].toUpperCase()}${substring(1)}';
   }
 }

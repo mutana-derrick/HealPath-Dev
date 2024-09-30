@@ -1,1 +1,26 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"healpath-b751e","appId":"1:988154331832:android:a3434c50346883a6692a4d","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"healpath-b751e","configurations":{"android":"1:988154331832:android:a3434c50346883a6692a4d","ios":"1:988154331832:ios:97538a0ac5e4c8fa692a4d"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "healpath-b751e",
+          "appId": "1:988154331832:android:a3434c50346883a6692a4d",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "healpath-b751e",
+          "configurations": {
+            "android": "1:988154331832:android:a3434c50346883a6692a4d",
+            "ios": "1:988154331832:ios:97538a0ac5e4c8fa692a4d"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  }
+}

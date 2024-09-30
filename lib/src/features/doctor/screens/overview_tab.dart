@@ -1,8 +1,94 @@
-// lib/tabs/overview_tab.dart
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class OverviewController extends GetxController {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  RxInt totalPatients = 0.obs;
+  RxInt newPatients = 0.obs;
+  RxInt activeTreatmentPlans = 0.obs;
+  RxDouble completedTreatments = 0.0.obs;
+  RxDouble ongoingTreatments = 0.0.obs;
+  RxDouble patientSatisfaction = 0.0.obs;
+  RxBool isLoading = false.obs;
+  RxString errorMessage = ''.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchData();
+  }
+
+  Future<void> fetchData() async {
+    isLoading.value = true;
+    errorMessage.value = '';
+    try {
+      // Fetch total patients with role 'patient'
+      QuerySnapshot patientsSnapshot = await _firestore
+          .collection('users')
+          .where('role', isEqualTo: 'patient')
+          .get();
+      totalPatients.value = patientsSnapshot.size;
+
+      // Fetch new patients (this month) with role 'patient'
+      DateTime firstDayOfMonth =
+          DateTime(DateTime.now().year, DateTime.now().month, 1);
+      QuerySnapshot newPatientsSnapshot = await _firestore
+          .collection('users')
+          .where('role', isEqualTo: 'patient')
+          .where('createdAt', isGreaterThanOrEqualTo: firstDayOfMonth)
+          .get();
+      newPatients.value = newPatientsSnapshot.size;
+
+      // Fetch active treatment plans of patients with status 'Active'
+      QuerySnapshot activePlansSnapshot = await _firestore
+          .collection('users')
+          .where('status', isEqualTo: 'Active')
+          .get();
+      activeTreatmentPlans.value = activePlansSnapshot.size;
+
+      // Calculate treatment progress
+
+      // QuerySnapshot allTreatmentsSnapshot =
+      //     await _firestore.collection('treatmentPlans').get();
+      // int totalTreatments = allTreatmentsSnapshot.size;
+      // QuerySnapshot completedTreatmentsSnapshot = await _firestore
+      //     .collection('treatmentPlans')
+      //     .where('status', isEqualTo: 'completed')
+      //     .get();
+      // int completedTreatmentsCount = completedTreatmentsSnapshot.size;
+
+      // completedTreatments.value =
+      //     totalTreatments > 0 ? completedTreatmentsCount / totalTreatments : 0;
+      // ongoingTreatments.value = totalTreatments > 0
+      //     ? 1 - (completedTreatmentsCount / totalTreatments)
+      //     : 0;
+
+      // Calculate patient satisfaction from 'users' collection where role is 'patient'
+
+      // QuerySnapshot satisfactionSnapshot = await _firestore
+      //     .collection('users')
+      //     .where('role', isEqualTo: 'patient')
+      //     .get();
+      // double totalSatisfaction = 0;
+      // for (var doc in satisfactionSnapshot.docs) {
+      //   totalSatisfaction +=
+      //       (doc.data() as Map<String, dynamic>)['satisfaction'] ?? 0;
+      // }
+      // patientSatisfaction.value = satisfactionSnapshot.size > 0
+      //     ? totalSatisfaction / satisfactionSnapshot.size
+      //     : 0;
+    } catch (e) {
+      errorMessage.value = 'Error fetching data: $e';
+    } finally {
+      isLoading.value = false;
+    }
+  }
+}
 
 class OverviewTab extends StatelessWidget {
-  const OverviewTab({super.key});
+  final OverviewController controller = Get.put(OverviewController());
 
   @override
   Widget build(BuildContext context) {
@@ -14,18 +100,27 @@ class OverviewTab extends StatelessWidget {
             tabs: [
               Tab(text: 'Status'),
               Tab(text: 'Progress'),
-              // Tab(text: 'Recent Activity'),
             ],
             labelColor: Colors.blue,
             unselectedLabelColor: Colors.grey,
           ),
           Expanded(
-            child: TabBarView(
-              children: [
-                _buildPatientStats(),
-                _buildTreatmentProgress(),
-                // _buildRecentActivity(),
-              ],
+            child: RefreshIndicator(
+              onRefresh: controller.fetchData,
+              child: Obx(() {
+                if (controller.isLoading.value) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (controller.errorMessage.isNotEmpty) {
+                  return Center(child: Text(controller.errorMessage.value));
+                } else {
+                  return TabBarView(
+                    children: [
+                      _buildPatientStats(),
+                      _buildTreatmentProgress(),
+                    ],
+                  );
+                }
+              }),
             ),
           ),
         ],
@@ -39,13 +134,20 @@ class OverviewTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildStatCard('Total Patients', '120', Icons.people, Colors.blue),
+          Obx(() => _buildStatCard('Total Patients',
+              controller.totalPatients.toString(), Icons.people, Colors.blue)),
           const SizedBox(height: 16),
-          _buildStatCard('New Patients (This Month)', '15', Icons.person_add,
-              Colors.green),
+          Obx(() => _buildStatCard(
+              'New Patients (This Month)',
+              controller.newPatients.toString(),
+              Icons.person_add,
+              Colors.green)),
           const SizedBox(height: 16),
-          _buildStatCard(
-              'Active Treatment Plans', '95', Icons.healing, Colors.orange),
+          Obx(() => _buildStatCard(
+              'Active Treatment Plans',
+              controller.activeTreatmentPlans.toString(),
+              Icons.healing,
+              Colors.orange)),
         ],
       ),
     );
@@ -57,28 +159,16 @@ class OverviewTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildProgressCard('Completed Treatments', 0.7),
+          Obx(() => _buildProgressCard(
+              'Completed Treatments', controller.completedTreatments.value)),
           const SizedBox(height: 16),
-          _buildProgressCard('Ongoing Treatments', 0.3),
+          Obx(() => _buildProgressCard(
+              'Ongoing Treatments', controller.ongoingTreatments.value)),
           const SizedBox(height: 16),
-          _buildProgressCard('Patient Satisfaction', 0.85),
+          Obx(() => _buildProgressCard(
+              'Patient Satisfaction', controller.patientSatisfaction.value)),
         ],
       ),
-    );
-  }
-
-  Widget _buildRecentActivity() {
-    return ListView(
-      children: [
-        _buildActivityItem(
-            'John Doe completed a therapy session', '2 hours ago'),
-        _buildActivityItem(
-            'New patient file created for Jane Smith', '4 hours ago'),
-        _buildActivityItem(
-            'Treatment plan updated for Mike Johnson', 'Yesterday'),
-        _buildActivityItem(
-            'Follow-up appointment scheduled with Emily Brown', '2 days ago'),
-      ],
     );
   }
 
@@ -136,18 +226,6 @@ class OverviewTab extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildActivityItem(String activity, String time) {
-    return ListTile(
-      leading: const CircleAvatar(
-        backgroundColor: Colors.blue,
-        child: Icon(Icons.notifications, color: Colors.white),
-      ),
-      title: Text(activity),
-      subtitle: Text(time),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
     );
   }
 }

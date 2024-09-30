@@ -6,7 +6,7 @@ class CommentCard extends StatelessWidget {
 
   const CommentCard({super.key, required this.comment});
 
-  @override
+  @override 
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),

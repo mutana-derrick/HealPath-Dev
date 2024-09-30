@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:healpath/src/features/doctor/models/patient_model.dart';
 
-// Function to view patient details
 void viewPatientDetails(
     BuildContext context, Patient patient, Function(String) showSnackBar) {
   showCupertinoModalBottomSheet(
@@ -14,42 +14,24 @@ void viewPatientDetails(
   );
 }
 
-// PatientDetailsModal widget
 class PatientDetailsModal extends StatefulWidget {
   final Patient patient;
   final Function(String) showSnackBar;
 
   const PatientDetailsModal({
-    super.key,
+    Key? key,
     required this.patient,
     required this.showSnackBar,
-  });
+  }) : super(key: key);
 
   @override
   _PatientDetailsModalState createState() => _PatientDetailsModalState();
 }
 
 class _PatientDetailsModalState extends State<PatientDetailsModal> {
-  late List<Map<String, String>> comments;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TextEditingController _commentController = TextEditingController();
   String? uploadedFile;
-
-  @override
-  void initState() {
-    super.initState();
-    comments = [
-      {
-        'doctorName': 'Dr. Smith',
-        'comment': 'Patient is responding well to treatment.',
-        'time': '2024-09-25 10:30 AM'
-      },
-      {
-        'doctorName': 'Dr. Johnson',
-        'comment': 'The patients vitals are stable.',
-        'time': '2024-09-24 02:45 PM'
-      },
-    ];
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +77,7 @@ class _PatientDetailsModalState extends State<PatientDetailsModal> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
       ),
       child: const Row(
-        mainAxisAlignment: MainAxisAlignment.center, // Center horizontally
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             'Patient Details',
@@ -175,7 +157,31 @@ class _PatientDetailsModalState extends State<PatientDetailsModal> {
             padding: const EdgeInsets.all(12),
             child: Column(
               children: [
-                ...comments.map(_buildCommentItem).toList(),
+                StreamBuilder<QuerySnapshot>(
+                  stream: _firestore
+                      .collection('patients')
+                      .doc(widget.patient.id)
+                      .collection('comments')
+                      .orderBy('time', descending: true)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    }
+
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    }
+
+                    List<DocumentSnapshot> comments = snapshot.data!.docs;
+
+                    return Column(
+                      children: comments
+                          .map((comment) => _buildCommentItem(comment))
+                          .toList(),
+                    );
+                  },
+                ),
                 SizedBox(height: 16),
                 _buildAddCommentField(),
               ],
@@ -186,7 +192,8 @@ class _PatientDetailsModalState extends State<PatientDetailsModal> {
     );
   }
 
-  Widget _buildCommentItem(Map<String, String> comment) {
+  Widget _buildCommentItem(DocumentSnapshot comment) {
+    Map<String, dynamic> data = comment.data() as Map<String, dynamic>;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Column(
@@ -196,14 +203,14 @@ class _PatientDetailsModalState extends State<PatientDetailsModal> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                comment['doctorName']!,
+                data['doctorName'] ?? '',
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.blue,
                 ),
               ),
               Text(
-                comment['time']!,
+                data['time'] ?? '',
                 style: const TextStyle(
                   fontSize: 12,
                   color: Colors.grey,
@@ -212,7 +219,7 @@ class _PatientDetailsModalState extends State<PatientDetailsModal> {
             ],
           ),
           const SizedBox(height: 4),
-          Text(comment['comment']!),
+          Text(data['comment'] ?? ''),
           const Divider(),
         ],
       ),
@@ -235,15 +242,14 @@ class _PatientDetailsModalState extends State<PatientDetailsModal> {
                 decoration: InputDecoration(
                   hintText: 'Add a comment...',
                   hintStyle: TextStyle(
-                    height:
-                        1.5, // Adjust this value to vertically center the hint text
+                    height: 1.5,
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
-                    vertical: 10, // Increased vertical padding
+                    vertical: 10,
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20),
@@ -253,20 +259,17 @@ class _PatientDetailsModalState extends State<PatientDetailsModal> {
                     ),
                   ),
                   suffixIcon: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 4), // Added padding to center the icon
+                    padding: const EdgeInsets.symmetric(vertical: 4),
                     child: IconButton(
                       icon: const Icon(Icons.send),
                       color: Colors.blue,
                       onPressed: _addComment,
                     ),
                   ),
-                  isCollapsed: true, // This helps in reducing extra padding
-                  alignLabelWithHint:
-                      true, // This helps align the hint text vertically
+                  isCollapsed: true,
+                  alignLabelWithHint: true,
                 ),
-                textAlignVertical: TextAlignVertical
-                    .center, // Centers the input text vertically
+                textAlignVertical: TextAlignVertical.center,
                 maxLines: 2,
               ),
             ),
@@ -277,53 +280,73 @@ class _PatientDetailsModalState extends State<PatientDetailsModal> {
   }
 
   Widget _buildMedicalHistoryView() {
-    // Simulated static data for medical history file
-    String medicalHistoryFile = 'Medical_History_Report.pdf';
+    return StreamBuilder<DocumentSnapshot>(
+      stream:
+          _firestore.collection('patients').doc(widget.patient.id).snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Medical History',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 12),
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator();
+        }
 
-        // Static file representation (Medical History from another hospital)
-        Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: GestureDetector(
-            onTap: () {
-              // Logic to view the medical history file
-              widget.showSnackBar('Viewing $medicalHistoryFile');
-            },
-            child: Text(
-              medicalHistoryFile,
-              style: const TextStyle(
-                color: Colors.blue,
-                decoration: TextDecoration.underline,
+        Map<String, dynamic>? data =
+            snapshot.data?.data() as Map<String, dynamic>?;
+        String medicalHistoryFile =
+            data?['medicalHistoryFile'] ?? 'No file available';
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Medical History',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
               ),
             ),
-          ),
-        ),
-      ],
+            const SizedBox(height: 12),
+            // File representation (Medical History from another hospital)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: GestureDetector(
+                onTap: () {
+                  // Logic to view the medical history file
+                  widget.showSnackBar('Viewing $medicalHistoryFile');
+                },
+                child: Text(
+                  medicalHistoryFile,
+                  style: const TextStyle(
+                    color: Colors.blue,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
   void _addComment() {
     if (_commentController.text.isNotEmpty) {
-      setState(() {
-        comments.insert(0, {
-          'doctorName': 'Dr. You',
-          'comment': _commentController.text,
-          'time': DateTime.now().toString().substring(0, 16),
-        });
+      _firestore
+          .collection('patients')
+          .doc(widget.patient.id)
+          .collection('comments')
+          .add({
+        'doctorName': 'Dr. You', // Replace with actual doctor's name
+        'comment': _commentController.text,
+        'time': DateTime.now().toString(),
+      }).then((_) {
         _commentController.clear();
+        widget.showSnackBar('Comment added successfully');
+      }).catchError((error) {
+        widget.showSnackBar('Error adding comment: $error');
       });
-      widget.showSnackBar('Comment added successfully');
     }
   }
 }

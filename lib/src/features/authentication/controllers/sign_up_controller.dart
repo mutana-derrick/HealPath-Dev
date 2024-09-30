@@ -21,42 +21,46 @@ class SignUpController extends GetxController {
   Future<void> signUpPatient(String email, String password, String fullName,
       String phoneNumber, PlatformFile? file) async {
     try {
-      // Start loading
       isLoading(true);
 
       // Firebase Authentication
       UserCredential userCredential = await _auth
           .createUserWithEmailAndPassword(email: email, password: password);
 
-      // Upload discharge summary file if it exists
       String fileUrl = '';
       if (file != null) {
         fileUrl = await _uploadFile(file, userCredential.user!.uid);
       }
 
-      // Store user data in Firestore
+      // Create user document
       await _firestore.collection('users').doc(userCredential.user!.uid).set({
         'email': email,
         'fullName': fullName,
         'phoneNumber': phoneNumber,
         'role': 'patient',
-        'dischargeSummaryUrl': fileUrl,
         'createdAt': DateTime.now(),
       });
 
-      // Show success message
+      // Create patient document
+      await _firestore
+          .collection('patients')
+          .doc(userCredential.user!.uid)
+          .set({
+        'userId': userCredential.user!.uid,
+        'dischargeSummaryUrl': fileUrl,
+        'treatmentPlanId': null,
+        'satisfaction': 0,
+        'createdAt': DateTime.now(),
+      });
+
       _showSnackBar("Success", "Account created successfully!", true);
 
-      // Navigate to login screen after a short delay
       Future.delayed(Duration(seconds: 2), () {
-        Get.off(() =>
-            LoginScreen()); // Replace with your actual login screen widget
+        Get.off(() => LoginScreen());
       });
     } catch (e) {
-      // Error handling
       _showSnackBar("Error", e.toString(), false);
     } finally {
-      // Stop loading
       isLoading(false);
     }
   }

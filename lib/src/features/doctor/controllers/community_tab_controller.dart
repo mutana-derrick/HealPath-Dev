@@ -2,10 +2,10 @@ import 'package:get/get.dart';
 import 'package:healpath/src/features/doctor/models/comment.dart';
 import 'package:healpath/src/features/doctor/models/post.dart';
 
-
 class CommunityTabController extends GetxController {
   List<Post> posts = [
     Post(
+      id: "1",
       userName: 'Dr. Mohamed Benar',
       userProfilePicture:
           'https://www.flaticon.com/free-icon/medical-assistance_4526826?related_id=4526826',
@@ -32,6 +32,7 @@ class CommunityTabController extends GetxController {
     ),
 
     Post(
+      id: "2",
       userName: 'Dr. Mohamed Benar',
       userProfilePicture:
           'https://www.flaticon.com/free-icon/medical-assistance_4526826?related_id=4526826',
@@ -58,6 +59,7 @@ class CommunityTabController extends GetxController {
     ),
 
     Post(
+      id: "3",
       userName: 'Dr. Mohamed Benar',
       userProfilePicture:
           'https://www.flaticon.com/free-icon/medical-assistance_4526826?related_id=4526826',
