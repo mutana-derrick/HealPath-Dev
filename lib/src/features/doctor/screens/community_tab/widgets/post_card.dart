@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../models/post.dart';
 
+
 class PostCard extends StatefulWidget {
   final Post post;
   final VoidCallback onTap;
@@ -76,15 +77,27 @@ class _PostCardState extends State<PostCard> {
             Row(
               children: [
                 IconButton(
-                  icon:
-                      const Icon(Icons.thumb_up, color: Colors.blue, size: 16),
+                  icon: const Icon(Icons.thumb_up, color: Colors.blue, size: 16),
                   onPressed: () => _incrementLikes(updatedPost),
                 ),
                 const SizedBox(width: 4),
                 Text('${updatedPost.likes}'),
               ],
             ),
-            Text('${updatedPost.comments.length} Comments'),
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('posts')
+                  .doc(widget.post.id)
+                  .collection('comments')
+                  .snapshots(),
+              builder: (context, commentSnapshot) {
+                if (!commentSnapshot.hasData) {
+                  return const Text('0 Comments');
+                }
+                final commentCount = commentSnapshot.data!.docs.length;
+                return Text('$commentCount Comments');
+              },
+            ),
           ],
         );
       },

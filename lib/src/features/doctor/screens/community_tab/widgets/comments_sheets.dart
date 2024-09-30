@@ -36,19 +36,20 @@ class CommentsSheet extends StatelessWidget {
                   }
 
                   final comments = snapshot.data!.docs
-    .map((doc) => Comment.fromFirestore(doc))  // Map each doc to a Comment object
-    .toList();
+                      .map((doc) => Comment.fromFirestore(doc))
+                      .toList();
 
-return ListView(
-  children: [
-    Padding(
-      padding: const EdgeInsets.all(16),
-      child: Text(post.content),
-    ),
-    ...comments.map((comment) => CommentCard(comment: comment)).toList(),
-  ],
-);
-
+                  return ListView(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Text(post.content),
+                      ),
+                      ...comments
+                          .map((comment) => CommentCard(comment: comment))
+                          .toList(),
+                    ],
+                  );
                 },
               ),
             ),
@@ -93,7 +94,8 @@ return ListView(
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.send),
                     color: Colors.blue,
@@ -115,18 +117,27 @@ return ListView(
     );
   }
 
-  void _addComment(BuildContext context, TextEditingController controller) async {
+  void _addComment(
+      BuildContext context, TextEditingController controller) async {
     if (controller.text.isNotEmpty) {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
+        // Fetch user's fullName from Firestore
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+        final userName = userDoc.data()?['fullName'] ?? 'Anonymous';
+
         await FirebaseFirestore.instance
             .collection('posts')
             .doc(post.id)
             .collection('comments')
             .add({
           'content': controller.text,
-          'userName': user.displayName ?? 'Anonymous',
-          'userProfilePicture': user.photoURL ?? 'https://example.com/default.jpg',
+          'userName': userName,
+          'userProfilePicture':
+              user.photoURL ?? 'https://example.com/default.jpg',
           'timestamp': FieldValue.serverTimestamp(),
         });
         controller.clear();

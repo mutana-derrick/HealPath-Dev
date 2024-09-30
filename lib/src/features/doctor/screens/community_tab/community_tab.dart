@@ -15,7 +15,7 @@ class CommunityTab extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.all(16.0),
-          child: _buildNewPostField(context),
+          child: NewPostField(),
         ),
         Expanded(
           child: StreamBuilder<QuerySnapshot>(
@@ -52,9 +52,19 @@ class CommunityTab extends StatelessWidget {
     );
   }
 
-  Widget _buildNewPostField(BuildContext context) {
-    final TextEditingController _postController = TextEditingController();
+  void _showComments(BuildContext context, Post post) {
+    showCupertinoModalBottomSheet(
+      context: context,
+      builder: (context) => CommentsSheet(post: post),
+    );
+  }
+}
 
+class NewPostField extends StatelessWidget {
+  final TextEditingController _postController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -76,18 +86,8 @@ class CommunityTab extends StatelessWidget {
             icon: const Icon(Icons.send),
             onPressed: () async {
               if (_postController.text.isNotEmpty) {
-                final user = FirebaseAuth.instance.currentUser;
-                if (user != null) {
-                  await FirebaseFirestore.instance.collection('posts').add({
-                    'content': _postController.text,
-                    'userName': user.displayName ?? 'Anonymous',
-                    'userProfilePicture':
-                        user.photoURL ?? 'https://example.com/default.jpg',
-                    'timestamp': FieldValue.serverTimestamp(),
-                    'likes': 0,
-                  });
-                  _postController.clear();
-                }
+                await _handlePost(_postController.text);
+                _postController.clear();
               }
             },
           ),
@@ -101,10 +101,25 @@ class CommunityTab extends StatelessWidget {
     );
   }
 
-  void _showComments(BuildContext context, Post post) {
-    showCupertinoModalBottomSheet(
-      context: context,
-      builder: (context) => CommentsSheet(post: post),
-    );
+  Future<void> _handlePost(String content) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      // Fetch doctor's fullName from Firestore
+      final doctorSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      final doctorFullName = doctorSnapshot.data()?['fullName'] ?? 'Anonymous';
+
+      await FirebaseFirestore.instance.collection('posts').add({
+        'content': content,
+        'userName': doctorFullName,
+        'userProfilePicture':
+            user.photoURL ?? 'https://example.com/default.jpg',
+        'timestamp': Timestamp.now(),
+        'likes': 0,
+      });
+    }
   }
 }

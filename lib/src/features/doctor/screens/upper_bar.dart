@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:healpath/src/features/authentication/controllers/logout_controller.dart';
 import 'package:healpath/src/features/authentication/screens/login/login_screen.dart';
+import 'package:healpath/src/features/doctor/controllers/upper_bar_controller.dart';
 import 'package:intl/intl.dart'; // For date formatting
 import 'package:healpath/src/features/doctor/screens/circle_button.dart'; // Custom CircleButton widget
 import 'package:get/get.dart';
@@ -9,6 +10,8 @@ class UpperBar extends StatelessWidget {
   UpperBar({super.key}) {
     // Lazy initialization of LogOutController
     Get.lazyPut(() => LogOutController(), fenix: true);
+    // Fetch doctor name dynamically
+    Get.lazyPut(() => DoctorController(), fenix: true);
   }
 
   void _handleLogout() async {
@@ -29,6 +32,9 @@ class UpperBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Access the DoctorController to fetch doctor name
+    final DoctorController doctorController = Get.find<DoctorController>();
+
     // Format today's date as 'MMM / d / yyyy' (e.g., "Sep / 11 / 2024")
     final String formattedDate =
         DateFormat('MMM / d / yyyy').format(DateTime.now());
@@ -72,12 +78,31 @@ class UpperBar extends StatelessWidget {
             crossAxisAlignment:
                 CrossAxisAlignment.start, // Align items to the start
             children: [
-              // Greeting text "Hello, Dr Kwizigira"
-              Text(
-                "Hello,\nDr Kwizigira",
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Colors.white), // White text color for the greeting
-              ),
+              Obx(() {
+                if (doctorController.isLoading.value) {
+                  return CircularProgressIndicator(
+                    color: Colors.white,
+                  );
+                }
+
+                if (doctorController.errorMessage.isNotEmpty) {
+                  return Text(
+                    'Error loading name',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge
+                        ?.copyWith(color: Colors.white),
+                  );
+                }
+
+                return Text(
+                  "Hello,\nDr ${doctorController.doctorName.value}",
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleLarge
+                      ?.copyWith(color: Colors.white), // White text color
+                );
+              }),
               Column(
                 children: [
                   CircleButton(

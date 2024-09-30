@@ -1,12 +1,13 @@
-import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
-import 'comment.dart'; // Import the Comment model
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+import 'comment.dart';
 
 class Post {
   final String id;
   final String userName;
   final String userProfilePicture;
   final String content;
-  final String timestamp; // Now it will store a formatted string version of timestamp
+  final String timestamp; // Now formatted as date string
   final int likes;
   final List<Comment> comments;
 
@@ -20,17 +21,17 @@ class Post {
     required this.comments,
   });
 
-  // Factory method to create a Post from Firestore data
   factory Post.fromFirestore(DocumentSnapshot doc) {
     var data = doc.data() as Map<String, dynamic>;
 
-    // Convert Firestore's Timestamp to a formatted string
+    // Format timestamp to display only the date
     String formattedTimestamp = '';
     if (data['timestamp'] != null && data['timestamp'] is Timestamp) {
-      formattedTimestamp = (data['timestamp'] as Timestamp).toDate().toIso8601String();
+      formattedTimestamp = DateFormat('yyyy-MM-dd')
+          .format((data['timestamp'] as Timestamp).toDate());
     }
 
-    // Handle comments which are stored as a List of Maps in Firestore
+    // Process comments
     var commentsData = data['comments'] as List<dynamic>? ?? [];
     List<Comment> commentList = commentsData.map((commentData) {
       return Comment(
@@ -46,9 +47,11 @@ class Post {
       userName: data['userName'] ?? '',
       userProfilePicture: data['userProfilePicture'] ?? '',
       content: data['content'] ?? '',
-      timestamp: formattedTimestamp, // Use the formatted timestamp
+      timestamp: formattedTimestamp, // Use formatted date
       likes: data['likes'] ?? 0,
       comments: commentList,
     );
   }
+
+  get commentCount => null;
 }
