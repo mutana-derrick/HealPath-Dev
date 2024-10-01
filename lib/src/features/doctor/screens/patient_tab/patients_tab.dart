@@ -7,29 +7,50 @@ import 'package:healpath/src/features/doctor/models/patient_model.dart';
 class PatientsController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   RxList<Patient> patients = <Patient>[].obs;
+  RxList<Patient> filteredPatients = <Patient>[].obs;
   RxBool isLoading = true.obs;
   RxString errorMessage = ''.obs;
+  RxString searchQuery = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
     fetchPatients();
+    debounce(searchQuery, (_) => filterPatients(),
+        time: const Duration(milliseconds: 500));
   }
 
   Future<void> fetchPatients() async {
     isLoading.value = true;
     errorMessage.value = '';
     try {
-      QuerySnapshot snapshot = await _firestore.collection('patients').get();
+      QuerySnapshot snapshot = await _firestore
+          .collection('users')
+          .where('role', isEqualTo: 'patient')
+          .get();
+
       patients.value = snapshot.docs.map((doc) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+        // Handle Timestamp to String conversion for 'createdAt'
+        Timestamp? createdAtTimestamp = data['createdAt'];
+        String formattedDate = '';
+
+        if (createdAtTimestamp != null) {
+          DateTime date = createdAtTimestamp.toDate();
+          formattedDate =
+              '${date.year}-${date.month}-${date.day}'; // Format as needed
+        }
+
         return Patient(
-          name: data['name'] ?? '',
+          name: data['fullName'] ?? '',
           id: doc.id,
           status: data['status'] ?? 'Active',
-          admissionDate: data['admissionDate'] ?? '',
+          admissionDate: formattedDate, // Use the formatted date
         );
       }).toList();
+
+      filterPatients(); // Apply the initial filtering based on search query
     } catch (e) {
       errorMessage.value = 'Error fetching patients: $e';
     } finally {
@@ -37,14 +58,22 @@ class PatientsController extends GetxController {
     }
   }
 
+  void filterPatients() {
+    final query = searchQuery.value.toLowerCase();
+    filteredPatients.value = patients.where((patient) {
+      return patient.name.toLowerCase().contains(query);
+    }).toList();
+  }
+
   Future<void> togglePatientStatus(Patient patient) async {
     try {
       String newStatus = patient.status == 'Active' ? 'Archived' : 'Active';
-      await _firestore.collection('patients').doc(patient.id).update({
+      await _firestore.collection('users').doc(patient.id).update({
         'status': newStatus,
       });
       patient.status = newStatus;
       patients.refresh();
+      filterPatients();
     } catch (e) {
       errorMessage.value = 'Error updating patient status: $e';
     }
@@ -54,7 +83,7 @@ class PatientsController extends GetxController {
 class PatientsTab extends StatelessWidget {
   final PatientsController controller = Get.put(PatientsController());
 
-   PatientsTab({super.key});
+  PatientsTab({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +117,8 @@ class PatientsTab extends StatelessWidget {
                       suffixIcon: Icon(Icons.people),
                     ),
                     onChanged: (value) {
-                      // TODO: Implement search functionality
+                      controller.searchQuery.value =
+                          value; // Updates the search query
                     },
                   ),
                 ),
@@ -99,7 +129,7 @@ class PatientsTab extends StatelessWidget {
                 onRefresh: controller.fetchPatients,
                 child: Obx(() {
                   if (controller.isLoading.value) {
-                    return Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator());
                   } else if (controller.errorMessage.isNotEmpty) {
                     return Center(child: Text(controller.errorMessage.value));
                   } else {
@@ -122,7 +152,12 @@ class PatientsTab extends StatelessWidget {
   Widget _buildPatientList(String status) {
     return Obx(() {
       List<Patient> filteredPatients =
-          controller.patients.where((p) => p.status == status).toList();
+          controller.filteredPatients.where((p) => p.status == status).toList();
+
+      if (filteredPatients.isEmpty) {
+        return const Center(child: Text('No patients found'));
+      }
+
       return ListView.builder(
         itemCount: filteredPatients.length,
         itemBuilder: (context, index) {
@@ -140,16 +175,16 @@ class PatientsTab extends StatelessWidget {
           child: Text(patient.name[0]),
         ),
         title: Text(patient.name),
-        subtitle:
-            Text("ID: ${patient.id} | Admitted: ${patient.admissionDate}"),
+        subtitle: Text("| Admitted: ${patient.admissionDate}"),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(patient.status,
-                style: TextStyle(
-                  color:
-                      patient.status == "Active" ? Colors.green : Colors.grey,
-                )),
+            Text(
+              patient.status,
+              style: TextStyle(
+                color: patient.status == "Active" ? Colors.green : Colors.grey,
+              ),
+            ),
             const SizedBox(width: 8),
             PopupMenuButton<String>(
               onSelected: (value) async {

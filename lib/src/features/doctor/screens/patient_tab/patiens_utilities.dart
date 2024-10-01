@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // For authentication
+import 'package:intl/intl.dart'; // For date formatting
 import 'package:healpath/src/features/doctor/models/patient_model.dart';
 
 void viewPatientDetails(
@@ -19,10 +21,10 @@ class PatientDetailsModal extends StatefulWidget {
   final Function(String) showSnackBar;
 
   const PatientDetailsModal({
-    Key? key,
+    super.key,
     required this.patient,
     required this.showSnackBar,
-  }) : super(key: key);
+  });
 
   @override
   _PatientDetailsModalState createState() => _PatientDetailsModalState();
@@ -30,8 +32,32 @@ class PatientDetailsModal extends StatefulWidget {
 
 class _PatientDetailsModalState extends State<PatientDetailsModal> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance; // Firebase Auth instance
   final TextEditingController _commentController = TextEditingController();
   String? uploadedFile;
+  String? doctorName; // To store the doctor's name
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchDoctorName();
+  }
+
+  Future<void> _fetchDoctorName() async {
+    try {
+      // Assuming you have a 'users' collection in Firestore where the doctor data is stored
+      User? user = _auth.currentUser;
+      if (user != null) {
+        DocumentSnapshot userDoc =
+            await _firestore.collection('users').doc(user.uid).get();
+        setState(() {
+          doctorName = userDoc['fullName'] ?? 'Unknown Doctor';
+        });
+      }
+    } catch (e) {
+      widget.showSnackBar('Error fetching doctor name: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +128,7 @@ class _PatientDetailsModalState extends State<PatientDetailsModal> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildInfoRow('Name', widget.patient.name),
-            _buildInfoRow('ID', widget.patient.id),
+            // _buildInfoRow('ID', widget.patient.id),
             _buildInfoRow('Admission Date', widget.patient.admissionDate),
             _buildInfoRow('Status', widget.patient.status),
           ],
@@ -279,25 +305,35 @@ class _PatientDetailsModalState extends State<PatientDetailsModal> {
     );
   }
 
+  void _addComment() {
+    if (_commentController.text.isNotEmpty && doctorName != null) {
+      // Format the date to only include year, month, and day
+      String formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+      _firestore
+          .collection('patients')
+          .doc(widget.patient.id)
+          .collection('comments')
+          .add({
+        'doctorName': doctorName, // Logged-in doctor's name
+        'comment': _commentController.text,
+        'time': formattedDate, // Date formatted without time
+      }).then((_) {
+        _commentController.clear();
+        widget.showSnackBar('Comment added successfully');
+      }).catchError((error) {
+        widget.showSnackBar('Failed to add comment: $error');
+      });
+    }
+  }
+
   Widget _buildMedicalHistoryView() {
-    return StreamBuilder<DocumentSnapshot>(
-      stream:
-          _firestore.collection('patients').doc(widget.patient.id).snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
-        }
-
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator();
-        }
-
-        Map<String, dynamic>? data =
-            snapshot.data?.data() as Map<String, dynamic>?;
-        String medicalHistoryFile =
-            data?['medicalHistoryFile'] ?? 'No file available';
-
-        return Column(
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
@@ -308,53 +344,14 @@ class _PatientDetailsModalState extends State<PatientDetailsModal> {
               ),
             ),
             const SizedBox(height: 12),
-            // File representation (Medical History from another hospital)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: GestureDetector(
-                onTap: () {
-                  // Logic to view the medical history file
-                  widget.showSnackBar('Viewing $medicalHistoryFile');
-                },
-                child: Text(
-                  medicalHistoryFile,
-                  style: const TextStyle(
-                    color: Colors.blue,
-                    decoration: TextDecoration.underline,
-                  ),
-                ),
-              ),
+            const Text(
+              'Medical history.pdf',
+              style: TextStyle(color: Colors.blue),
             ),
           ],
-        );
-      },
+        ),
+      ),
     );
-  }
-
-  void _addComment() {
-    if (_commentController.text.isNotEmpty) {
-      _firestore
-          .collection('patients')
-          .doc(widget.patient.id)
-          .collection('comments')
-          .add({
-        'doctorName': 'Dr. You', // Replace with actual doctor's name
-        'comment': _commentController.text,
-        'time': DateTime.now().toString(),
-      }).then((_) {
-        _commentController.clear();
-        widget.showSnackBar('Comment added successfully');
-      }).catchError((error) {
-        widget.showSnackBar('Error adding comment: $error');
-      });
-    }
-  }
-}
-
-// Extension for string capitalization
-extension StringExtension on String {
-  String capitalize() {
-    return "${this[0].toUpperCase()}${this.substring(1)}";
   }
 }
 
