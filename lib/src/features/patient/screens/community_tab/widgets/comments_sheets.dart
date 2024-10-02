@@ -124,7 +124,6 @@ class _CommentsSheetState extends State<CommentsSheet> {
   }
 }
 
-// CommentCard and AuthController classes remain unchanged
 
 class CommentCard extends StatelessWidget {
   final Comment comment;
@@ -140,7 +139,12 @@ class CommentCard extends StatelessWidget {
             ? Text(comment.userName[0])
             : null,
       ),
-      title: Text(comment.userName),
+      title: Text(
+        comment.userName,
+        style: TextStyle(
+          fontWeight: FontWeight.bold, // Make the username bold
+        ),
+      ),
       subtitle: Text(comment.content),
       trailing: Text(comment.timestamp),
     );
@@ -158,6 +162,4 @@ class AuthController extends GetxController {
     super.onInit();
     _firebaseUser.bindStream(_auth.authStateChanges());
   }
-
-  // Add other authentication methods as needed
 }

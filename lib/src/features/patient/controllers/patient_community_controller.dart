@@ -20,22 +20,43 @@ class PatientCommunityController extends GetxController {
           .orderBy('timestamp', descending: true)
           .get();
 
-      var postList = postDocs.docs.map((doc) {
+      var postList = await Future.wait(postDocs.docs.map((doc) async {
         var data = doc.data();
+
+        // Fetch comments for each post
+        var commentDocs = await firestore
+            .collection('posts')
+            .doc(doc.id)
+            .collection('comments')
+            .orderBy('timestamp', descending: true)
+            .get();
+
+        var commentList = commentDocs.docs.map((commentDoc) {
+          var commentData = commentDoc.data();
+          return Comment(
+            content: commentData['content'] ?? '',
+            userName: commentData['userName'] ?? 'Anonymous',
+            userProfilePicture: commentData['userProfilePicture'] ?? '',
+            timestamp: commentData['timestamp'] != null
+                ? DateFormat('yyyy-MM-dd')
+                    .format((commentData['timestamp'] as Timestamp).toDate())
+                : '',
+          );
+        }).toList();
+
         return Post(
           id: doc.id,
           userName: data['userName'] ?? '',
           userProfilePicture: data['userProfilePicture'] ?? '',
           content: data['content'] ?? '',
           timestamp: data['timestamp'] != null
-              ? DateFormat('yyyy-MM-dd').format((data['timestamp'] as Timestamp).toDate())
+              ? DateFormat('yyyy-MM-dd')
+                  .format((data['timestamp'] as Timestamp).toDate())
               : '',
           likes: data['likes'] ?? 0,
-          comments: (data['comments'] as List<dynamic>?)
-              ?.map((c) => Comment.fromJson(c))
-              .toList() ?? [],
+          comments: commentList, // Add comments to the post
         );
-      }).toList();
+      }).toList());
 
       posts.assignAll(postList);
     } catch (e) {
@@ -55,8 +76,11 @@ class PatientCommunityController extends GetxController {
   Future<void> addComment(String postId, Comment comment) async {
     try {
       var postRef = firestore.collection('posts').doc(postId);
-      await postRef.update({
-        'comments': FieldValue.arrayUnion([comment.toMap()])
+      await postRef.collection('comments').add({
+        'content': comment.content,
+        'userName': comment.userName,
+        'userProfilePicture': comment.userProfilePicture,
+        'timestamp': FieldValue.serverTimestamp(),
       });
     } catch (e) {
       print('Error adding comment: $e');
