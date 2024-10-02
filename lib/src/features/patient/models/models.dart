@@ -1,4 +1,5 @@
 class Post {
+  final String id; // Added the id field
   final String userName;
   final String userProfilePicture;
   final String content;
@@ -7,6 +8,7 @@ class Post {
   final List<Comment> comments;
 
   Post({
+    required this.id, // Add id as a required parameter
     required this.userName,
     required this.userProfilePicture,
     required this.content,
@@ -28,4 +30,20 @@ class Comment {
     required this.userProfilePicture,
     required this.timestamp,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'content': content,
+      'userName': userName,
+      'userProfilePicture': userProfilePicture,
+      'timestamp': timestamp,
+    };
+  }
+
+  factory Comment.fromJson(Map<String, dynamic> json) => Comment(
+    content: json['content'],
+    userName: json['userName'],
+    userProfilePicture: json['userProfilePicture'],
+    timestamp: json['timestamp'],
+  );
 }

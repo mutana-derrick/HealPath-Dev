@@ -1,87 +1,65 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:healpath/src/features/patient/models/models.dart';
+import 'package:intl/intl.dart'; // Import this for date formatting
 
 class PatientCommunityController extends GetxController {
-  List<Post> posts = [
-    Post(
-      userName: 'Dr. Mohamed Benar',
-      userProfilePicture:
-          'https://www.flaticon.com/free-icon/medical-assistance_4526826?related_id=4526826',
-      content:
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam vitae nibh id mauris condimentum volutis et sed enim.',
-      timestamp: 'March 15 · 14:30',
-      likes: 15,
-      comments: [
-        Comment(
-          content:
-              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam vitae nibh id mauris condi mentum volutis et sed enim.',
-          userName: 'Salahuddin',
-          userProfilePicture: 'https://example.com/salahuddin.jpg',
-          timestamp: '2h',
-        ),
-        Comment(
-          content:
-              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam vitae nibh id.',
-          userName: 'Aman Richman',
-          userProfilePicture: 'https://example.com/aman.jpg',
-          timestamp: '1h',
-        ),
-      ],
-    ),
+  var posts = <Post>[].obs;
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-    Post(
-      userName: 'Dr. Mohamed Benar',
-      userProfilePicture:
-          'https://www.flaticon.com/free-icon/medical-assistance_4526826?related_id=4526826',
-      content:
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam vitae nibh id mauris condimentum volutis et sed enim.',
-      timestamp: 'March 15 · 14:30',
-      likes: 15,
-      comments: [
-        Comment(
-          content:
-              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam vitae nibh id mauris condi mentum volutis et sed enim.',
-          userName: 'Salahuddin',
-          userProfilePicture: 'https://example.com/salahuddin.jpg',
-          timestamp: '2h',
-        ),
-        Comment(
-          content:
-              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam vitae nibh id.',
-          userName: 'Aman Richman',
-          userProfilePicture: 'https://example.com/aman.jpg',
-          timestamp: '1h',
-        ),
-      ],
-    ),
+  @override
+  void onInit() {
+    super.onInit();
+    fetchDoctorPosts();
+  }
 
-    Post(
-      userName: 'Dr. Mohamed Benar',
-      userProfilePicture:
-          'https://www.flaticon.com/free-icon/medical-assistance_4526826?related_id=4526826',
-      content:
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam vitae nibh id mauris condimentum volutis et sed enim.',
-      timestamp: 'March 15 · 14:30',
-      likes: 15,
-      comments: [
-        Comment(
-          content:
-              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam vitae nibh id mauris condi mentum volutis et sed enim.',
-          userName: 'Salahuddin',
-          userProfilePicture: 'https://example.com/salahuddin.jpg',
-          timestamp: '2h',
-        ),
-        Comment(
-          content:
-              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam vitae nibh id.',
-          userName: 'Aman Richman',
-          userProfilePicture: 'https://example.com/aman.jpg',
-          timestamp: '1h',
-        ),
-      ],
-    ),
-    // Add more posts as needed...
-  ];
+  void fetchDoctorPosts() async {
+    try {
+      var postDocs = await firestore
+          .collection('posts')
+          .orderBy('timestamp', descending: true)
+          .get();
 
-  // Additional methods and logic for the controller...
+      var postList = postDocs.docs.map((doc) {
+        var data = doc.data();
+        return Post(
+          id: doc.id,
+          userName: data['userName'] ?? '',
+          userProfilePicture: data['userProfilePicture'] ?? '',
+          content: data['content'] ?? '',
+          timestamp: data['timestamp'] != null
+              ? DateFormat('yyyy-MM-dd').format((data['timestamp'] as Timestamp).toDate())
+              : '',
+          likes: data['likes'] ?? 0,
+          comments: (data['comments'] as List<dynamic>?)
+              ?.map((c) => Comment.fromJson(c))
+              .toList() ?? [],
+        );
+      }).toList();
+
+      posts.assignAll(postList);
+    } catch (e) {
+      print('Error fetching doctor posts: $e');
+    }
+  }
+
+  void toggleLike(String postId, bool isLiked) async {
+    try {
+      var postRef = firestore.collection('posts').doc(postId);
+      await postRef.update({'likes': FieldValue.increment(isLiked ? 1 : -1)});
+    } catch (e) {
+      print('Error toggling like: $e');
+    }
+  }
+
+  Future<void> addComment(String postId, Comment comment) async {
+    try {
+      var postRef = firestore.collection('posts').doc(postId);
+      await postRef.update({
+        'comments': FieldValue.arrayUnion([comment.toMap()])
+      });
+    } catch (e) {
+      print('Error adding comment: $e');
+    }
+  }
 }

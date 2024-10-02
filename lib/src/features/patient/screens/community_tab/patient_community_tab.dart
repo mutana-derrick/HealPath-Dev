@@ -44,16 +44,16 @@ class PatientCommunityTab extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: ListView.builder(
-                  itemCount: controller.posts.length,
-                  itemBuilder: (context, index) {
-                    return PostCard(
-                      post: controller.posts[index],
-                      onTap: () =>
-                          _showComments(context, controller.posts[index]),
-                    );
-                  },
-                ),
+                child: Obx(() => ListView.builder(
+                      itemCount: controller.posts.length,
+                      itemBuilder: (context, index) {
+                        return PostCard(
+                          post: controller.posts[index],
+                          onTap: () =>
+                              _showComments(context, controller.posts[index]),
+                        );
+                      },
+                    )),
               ),
             ],
           ),

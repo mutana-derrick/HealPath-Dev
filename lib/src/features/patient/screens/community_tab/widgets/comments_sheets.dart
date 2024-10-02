@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:healpath/src/features/patient/models/models.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 class CommentsSheet extends StatefulWidget {
   final Post post;
@@ -13,8 +17,49 @@ class CommentsSheet extends StatefulWidget {
 class _CommentsSheetState extends State<CommentsSheet> {
   final TextEditingController _commentController = TextEditingController();
 
+  void _addComment() async {
+    if (_commentController.text.isNotEmpty) {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        // Fetch user's fullName from Firestore
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+        final userName = userDoc.data()?['fullName'] ?? 'Anonymous';
+
+        final comment = Comment(
+          content: _commentController.text,
+          userName: userName,
+          userProfilePicture:
+              user.photoURL ?? 'https://example.com/default.jpg',
+          timestamp: DateFormat('yyyy-MM-dd').format(DateTime.now()),
+        );
+
+        // Add comment to Firestore
+        await FirebaseFirestore.instance
+            .collection('posts')
+            .doc(widget.post.id)
+            .collection('comments')
+            .add({
+          'content': comment.content,
+          'userName': comment.userName,
+          'userProfilePicture': comment.userProfilePicture,
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+
+        // Update local state
+        setState(() {
+          widget.post.comments.add(comment);
+          _commentController.clear();
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // The build method remains unchanged
     return Material(
       child: SafeArea(
         top: false,
@@ -41,18 +86,16 @@ class _CommentsSheetState extends State<CommentsSheet> {
                 ],
               ),
             ),
-            Container(
+            Padding(
               padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-              ),
+                  bottom: MediaQuery.of(context).viewInsets.bottom),
               child: Padding(
                 padding: const EdgeInsets.all(8),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      width: MediaQuery.of(context).size.width *
-                          0.9, // 80% of screen width
+                      width: MediaQuery.of(context).size.width * 0.9,
                       child: TextField(
                         controller: _commentController,
                         decoration: InputDecoration(
@@ -60,34 +103,13 @@ class _CommentsSheetState extends State<CommentsSheet> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
                           suffixIcon: IconButton(
                             icon: const Icon(Icons.send),
                             color: Colors.blue,
-                            onPressed: () {
-                              if (_commentController.text.isNotEmpty) {
-                                setState(() {
-                                  widget.post.comments.add(Comment(
-                                    content: _commentController.text,
-                                    userName:
-                                        'Current User', // Replace with actual user name
-                                    userProfilePicture:
-                                        'https://example.com/user.jpg', // Replace with actual user profile picture
-                                    timestamp: 'Just now',
-                                  ));
-                                  _commentController.clear();
-                                });
-                              }
-                            },
+                            onPressed: _addComment,
                           ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide: const BorderSide(
-                              color: Colors.blue,
-                              width: 2.0,
-                            ),
-                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
                         ),
                       ),
                     ),
@@ -102,6 +124,8 @@ class _CommentsSheetState extends State<CommentsSheet> {
   }
 }
 
+// CommentCard and AuthController classes remain unchanged
+
 class CommentCard extends StatelessWidget {
   final Comment comment;
 
@@ -111,11 +135,29 @@ class CommentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: CircleAvatar(
-        child: Text(comment.userName[0]),
+        backgroundImage: NetworkImage(comment.userProfilePicture),
+        child: comment.userProfilePicture.isEmpty
+            ? Text(comment.userName[0])
+            : null,
       ),
       title: Text(comment.userName),
       subtitle: Text(comment.content),
       trailing: Text(comment.timestamp),
     );
   }
+}
+
+class AuthController extends GetxController {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  Rx<User?> _firebaseUser = Rx<User?>(null);
+
+  User? get currentUser => _firebaseUser.value;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _firebaseUser.bindStream(_auth.authStateChanges());
+  }
+
+  // Add other authentication methods as needed
 }

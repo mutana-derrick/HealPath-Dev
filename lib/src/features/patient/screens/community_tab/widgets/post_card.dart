@@ -1,30 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:healpath/src/features/patient/controllers/patient_community_controller.dart';
 import 'package:healpath/src/features/patient/models/models.dart';
+import 'package:get/get.dart';
 
 class PostCard extends StatefulWidget {
   final Post post;
   final VoidCallback onTap;
 
-  const PostCard({Key? key, required this.post, required this.onTap})
-      : super(key: key);
+  const PostCard({super.key, required this.post, required this.onTap});
 
   @override
   _PostCardState createState() => _PostCardState();
 }
 
 class _PostCardState extends State<PostCard> {
+  bool isLiked = false;
   late int likeCount;
 
   @override
   void initState() {
     super.initState();
     likeCount = widget.post.likes;
+    // Check if the user has liked the post (implement your own logic for user like tracking)
+    // isLiked = checkIfUserLikedPost();
   }
 
-  void _incrementLikes() {
+  void _toggleLike() {
     setState(() {
-      likeCount++;
+      isLiked = !isLiked;
+      likeCount = isLiked ? likeCount + 1 : likeCount - 1;
     });
+
+    // Update Firestore
+    Get.find<PatientCommunityController>().toggleLike(widget.post.id, isLiked);
   }
 
   @override
@@ -64,9 +72,12 @@ class _PostCardState extends State<PostCard> {
                   Row(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.thumb_up,
-                            color: Colors.blue, size: 16),
-                        onPressed: _incrementLikes,
+                        icon: Icon(
+                          Icons.thumb_up,
+                          color: isLiked ? Colors.blue : Colors.grey,
+                          size: 16,
+                        ),
+                        onPressed: _toggleLike,
                       ),
                       const SizedBox(width: 4),
                       Text('$likeCount'),
@@ -82,3 +93,4 @@ class _PostCardState extends State<PostCard> {
     );
   }
 }
+
