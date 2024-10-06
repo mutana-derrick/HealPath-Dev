@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:healpath/src/features/authentication/screens/login/login_screen.dart';
+import 'package:healpath/src/features/patient/screens/patient_onboarding_screen.dart';
 
 class SignUpController extends GetxController {
   // Firebase instances
@@ -50,14 +50,14 @@ class SignUpController extends GetxController {
         'dischargeSummaryUrl': fileUrl,
         'treatmentPlanId': null,
         'satisfaction': 0,
+        'onboardingCompleted': false,
         'createdAt': DateTime.now(),
       });
 
       _showSnackBar("Success", "Account created successfully!", true);
 
-      Future.delayed(Duration(seconds: 2), () {
-        Get.off(() => LoginScreen());
-      });
+      // Navigate to the onboarding screen instead of the login screen
+      Get.off(() => PatientOnboardingScreen());
     } catch (e) {
       _showSnackBar("Error", e.toString(), false);
     } finally {

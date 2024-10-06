@@ -30,6 +30,7 @@ dependencies:
   cloud_firestore: ^5.4.2
   firebase_storage: ^12.3.1
   http: ^1.2.2
+  lottie: ^3.1.2
 
   
 
@@ -55,6 +56,7 @@ flutter:
     - assets/images/
     - assets/logo/
     - assets/icons/
+    - assets/animations/
      
 
  
