@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:healpath/src/features/patient/controllers/patient_profile_controller.dart';
-import 'package:healpath/src/features/patient/screens/profile_tab/profile_content.dart';
-import 'package:healpath/src/features/patient/screens/profile_tab/profile_header.dart';
-import 'package:healpath/src/features/patient/screens/profile_tab/profile_image.dart';
-
+import 'profile_header.dart';
+import 'profile_content.dart';
+import 'profile_image.dart';
 
 class PatientProfileTab extends StatelessWidget {
-  const PatientProfileTab({super.key});
+  const PatientProfileTab({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +20,7 @@ class PatientProfileTab extends StatelessWidget {
                 children: [
                   ProfileHeader(),
                   Expanded(
-                    child: ProfileContent(controller: controller),
+                    child: ProfileContent(),
                   ),
                 ],
               ),
@@ -29,7 +28,7 @@ class PatientProfileTab extends StatelessWidget {
                 top: 130,
                 left: 0,
                 right: 0,
-                child: ProfileImage(controller: controller, context: context),
+                child: ProfileImage(),
               ),
             ],
           ),

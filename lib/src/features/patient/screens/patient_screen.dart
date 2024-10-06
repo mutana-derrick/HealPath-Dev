@@ -4,7 +4,6 @@ import 'package:google_nav_bar/google_nav_bar.dart'; // Import the GNav package
 import 'package:healpath/src/features/patient/screens/community_tab/patient_community_tab.dart';
 import 'package:healpath/src/features/patient/screens/emergency_tab/patient_emergency_tab.dart';
 import 'package:healpath/src/features/patient/screens/profile_tab/patient_profile_tab.dart';
-import 'package:healpath/src/features/patient/screens/progress_tab.dart';
 
 class PatientScreen extends StatelessWidget {
   const PatientScreen({super.key});
@@ -20,7 +19,6 @@ class PatientScreen extends StatelessWidget {
               index: controller.tabIndex,
               children: const [
                 PatientCommunityTab(),
-                PatientProgressTab(),
                 PatientEmergencyTab(),
                 PatientProfileTab()
               ],
@@ -56,10 +54,6 @@ class PatientScreen extends StatelessWidget {
                   GButton(
                     icon: Icons.group,
                     text: 'Community',
-                  ),
-                  GButton(
-                    icon: Icons.trending_up,
-                    text: 'Progress',
                   ),
                   GButton(
                     icon: Icons.emergency,
