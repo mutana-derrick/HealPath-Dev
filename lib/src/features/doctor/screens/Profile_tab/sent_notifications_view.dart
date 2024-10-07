@@ -1,38 +1,110 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SentNotificationsView extends StatelessWidget {
-  final List<Map<String, String>> sentNotifications = [
-    {
-      'title': 'Reminder: Group Session',
-      'status': 'Approved',
-      'date': '2023-05-15'
-    },
-    {'title': 'New Article Posted', 'status': 'Pending', 'date': '2023-05-14'},
-    {'title': 'Schedule Change', 'status': 'Approved', 'date': '2023-05-13'},
-  ];
-
-  SentNotificationsView({super.key});
+  const SentNotificationsView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: sentNotifications.length,
-      itemBuilder: (context, index) {
-        final notification = sentNotifications[index];
-        return Column(
-          children: [
-            ListTile(
-              title: Text(notification['title']!),
-              subtitle: Text('Date: ${notification['date']}'),
-              trailing: Chip(
-                label: Text(notification['status']!),
-                backgroundColor: notification['status'] == 'Approved'
-                    ? Colors.blue
-                    : Colors.orange,
-              ),
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('notifications')
+          .orderBy('sentAt', descending: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final notifications = snapshot.data!.docs;
+
+        return ListView.builder(
+          itemCount: notifications.length,
+          itemBuilder: (context, index) {
+            final notification = notifications[index];
+            final data = notification.data() as Map<String, dynamic>;
+
+            return ExpansionTile(
+              title: Text(data['title']),
+              subtitle: Text(
+                  'Sent: ${(data['sentAt'] as Timestamp).toDate().toString()}'),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Content: ${data['content']}'),
+                      const SizedBox(height: 8),
+                      Text(
+                          'Read by: ${(data['readBy'] as List).length} patients'),
+                      const SizedBox(height: 8),
+                      ElevatedButton(
+                        child: const Text('View Readers'),
+                        onPressed: () {
+                          _showReadersDialog(context, data['readBy'] as List);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showReadersDialog(BuildContext context, List readBy) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Patients who read this notification'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: readBy.isEmpty
+                ? const Text('No patients have read this notification yet.')
+                : FutureBuilder<QuerySnapshot>(
+                    future: FirebaseFirestore.instance
+                        .collection('users')
+                        .where(FieldPath.documentId, whereIn: readBy)
+                        .get(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      }
+                      final patients = snapshot.data!.docs;
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: patients.length,
+                        itemBuilder: (context, index) {
+                          final patient =
+                              patients[index].data() as Map<String, dynamic>;
+                          return ListTile(
+                            title: Text(patient['fullName']),
+                            subtitle: Text(patient['email']),
+                          );
+                        },
+                      );
+                    },
+                  ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Close'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
             ),
-            if (index < sentNotifications.length - 1)
-              const Divider(color: Colors.grey),
           ],
         );
       },

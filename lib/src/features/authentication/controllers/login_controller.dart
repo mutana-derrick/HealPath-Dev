@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:healpath/src/features/doctor/screens/doctor_dashboard.dart';
 import 'package:healpath/src/features/patient/screens/patient_screen.dart';
 
@@ -28,6 +29,12 @@ class LoginController extends GetxController {
       if (userDoc.exists) {
         Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
         String userRole = userData['role'] ?? '';
+
+        // Update FCM token
+        String? fcmToken = await getFCMToken();
+        if (fcmToken != null) {
+          await updateFCMToken(userCredential.user!.uid, fcmToken);
+        }
 
         _showSnackBar("Success", "Logged in successfully!", true);
 
@@ -81,5 +88,20 @@ class LoginController extends GetxController {
       shouldIconPulse: false,
       snackStyle: SnackStyle.FLOATING,
     );
+  }
+
+  Future<String?> getFCMToken() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    String? token = await messaging.getToken();
+    return token;
+  }
+
+  Future<void> updateFCMToken(String userId, String token) async {
+    try {
+      await _firestore.collection('users').doc(userId).update({'fcmToken': token});
+      print('FCM Token updated successfully');
+    } catch (e) {
+      print('Error updating FCM Token: $e');
+    }
   }
 }

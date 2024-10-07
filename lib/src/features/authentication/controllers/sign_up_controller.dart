@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:healpath/src/features/patient/screens/patient_onboarding_screen.dart';
 
 class SignUpController extends GetxController {
@@ -32,13 +33,18 @@ class SignUpController extends GetxController {
         fileUrl = await _uploadFile(file, userCredential.user!.uid);
       }
 
+      // Get FCM token
+      String? fcmToken = await getFCMToken();
+
       // Create user document
       await _firestore.collection('users').doc(userCredential.user!.uid).set({
         'email': email,
         'fullName': fullName,
         'phoneNumber': phoneNumber,
         'role': 'patient',
+        'status': 'Active',
         'createdAt': DateTime.now(),
+        'fcmToken': fcmToken,
       });
 
       // Create patient document
@@ -108,5 +114,11 @@ class SignUpController extends GetxController {
       shouldIconPulse: false,
       snackStyle: SnackStyle.FLOATING,
     );
+  }
+
+  Future<String?> getFCMToken() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    String? token = await messaging.getToken();
+    return token;
   }
 }

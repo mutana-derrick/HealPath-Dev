@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
+import 'package:healpath/src/features/doctor/screens/overview_tab.dart';
 import 'package:healpath/src/features/doctor/screens/patient_tab/patiens_utilities.dart';
 import 'package:healpath/src/features/doctor/models/patient_model.dart';
 
@@ -11,6 +12,8 @@ class PatientsController extends GetxController {
   RxBool isLoading = true.obs;
   RxString errorMessage = ''.obs;
   RxString searchQuery = ''.obs;
+
+  final OverviewController overviewController = Get.find<OverviewController>();
 
   @override
   void onInit() {
@@ -74,6 +77,9 @@ class PatientsController extends GetxController {
       patient.status = newStatus;
       patients.refresh();
       filterPatients();
+
+      // Refresh overview data
+      overviewController.refreshData();
     } catch (e) {
       errorMessage.value = 'Error updating patient status: $e';
     }

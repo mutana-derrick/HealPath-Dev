@@ -8,9 +8,6 @@ class OverviewController extends GetxController {
   RxInt totalPatients = 0.obs;
   RxInt newPatients = 0.obs;
   RxInt activeTreatmentPlans = 0.obs;
-  RxDouble completedTreatments = 0.0.obs;
-  RxDouble ongoingTreatments = 0.0.obs;
-  RxDouble patientSatisfaction = 0.0.obs;
   RxBool isLoading = false.obs;
   RxString errorMessage = ''.obs;
 
@@ -44,46 +41,20 @@ class OverviewController extends GetxController {
       // Fetch active treatment plans of patients with status 'Active'
       QuerySnapshot activePlansSnapshot = await _firestore
           .collection('users')
+          .where('role', isEqualTo: 'patient')
           .where('status', isEqualTo: 'Active')
           .get();
       activeTreatmentPlans.value = activePlansSnapshot.size;
-
-      // Calculate treatment progress
-
-      // QuerySnapshot allTreatmentsSnapshot =
-      //     await _firestore.collection('treatmentPlans').get();
-      // int totalTreatments = allTreatmentsSnapshot.size;
-      // QuerySnapshot completedTreatmentsSnapshot = await _firestore
-      //     .collection('treatmentPlans')
-      //     .where('status', isEqualTo: 'completed')
-      //     .get();
-      // int completedTreatmentsCount = completedTreatmentsSnapshot.size;
-
-      // completedTreatments.value =
-      //     totalTreatments > 0 ? completedTreatmentsCount / totalTreatments : 0;
-      // ongoingTreatments.value = totalTreatments > 0
-      //     ? 1 - (completedTreatmentsCount / totalTreatments)
-      //     : 0;
-
-      // Calculate patient satisfaction from 'users' collection where role is 'patient'
-
-      // QuerySnapshot satisfactionSnapshot = await _firestore
-      //     .collection('users')
-      //     .where('role', isEqualTo: 'patient')
-      //     .get();
-      // double totalSatisfaction = 0;
-      // for (var doc in satisfactionSnapshot.docs) {
-      //   totalSatisfaction +=
-      //       (doc.data() as Map<String, dynamic>)['satisfaction'] ?? 0;
-      // }
-      // patientSatisfaction.value = satisfactionSnapshot.size > 0
-      //     ? totalSatisfaction / satisfactionSnapshot.size
-      //     : 0;
     } catch (e) {
       errorMessage.value = 'Error fetching data: $e';
     } finally {
       isLoading.value = false;
     }
+  }
+
+  // New method to refresh data
+  void refreshData() {
+    fetchData();
   }
 }
 
@@ -148,25 +119,6 @@ class OverviewTab extends StatelessWidget {
               controller.activeTreatmentPlans.toString(),
               Icons.healing,
               Colors.orange)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTreatmentProgress() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Obx(() => _buildProgressCard(
-              'Completed Treatments', controller.completedTreatments.value)),
-          const SizedBox(height: 16),
-          Obx(() => _buildProgressCard(
-              'Ongoing Treatments', controller.ongoingTreatments.value)),
-          const SizedBox(height: 16),
-          Obx(() => _buildProgressCard(
-              'Patient Satisfaction', controller.patientSatisfaction.value)),
         ],
       ),
     );
