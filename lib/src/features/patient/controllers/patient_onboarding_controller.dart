@@ -19,14 +19,55 @@ class OnboardingController extends GetxController {
   var hivStatus = ''.obs;
   var needleSharingHistory = ''.obs;
 
+  // Validation
+  bool get isCurrentStepValid {
+    switch (currentStep.value) {
+      case 0:
+        return drugOfChoice.isNotEmpty;
+      case 1:
+        return injectionFrequency.isNotEmpty;
+      case 2:
+        return hivStatus.isNotEmpty;
+      case 3:
+        return needleSharingHistory.isNotEmpty;
+      default:
+        return false;
+    }
+  }
+
+  bool get isFormValid {
+    return drugOfChoice.isNotEmpty &&
+        injectionFrequency.isNotEmpty &&
+        hivStatus.isNotEmpty &&
+        needleSharingHistory.isNotEmpty;
+  }
+
+  void nextPage() {
+    if (isCurrentStepValid) {
+      if (currentStep.value < 3) {
+        pageController.nextPage(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      } else if (isFormValid) {
+        submitOnboardingData();
+      }
+    } else {
+      Get.snackbar('Error', 'Please answer the current question before proceeding.');
+    }
+  }
+
   Future<void> submitOnboardingData() async {
+    if (!isFormValid) {
+      Get.snackbar('Error', 'Please answer all questions before submitting.');
+      return;
+    }
+
     try {
       isLoading(true);
       final user = _auth.currentUser;
       if (user != null) {
         await _firestore.collection('patients').doc(user.uid).update({
-          'age': age.value,
-          'gender': gender.value,
           'drugOfChoice': drugOfChoice.value,
           'injectionFrequency': injectionFrequency.value,
           'hivStatus': hivStatus.value,
@@ -34,12 +75,10 @@ class OnboardingController extends GetxController {
           'onboardingCompleted': true,
         });
         Get.snackbar('Success', 'Onboarding completed successfully!');
-        // Navigate to the log in screen
         Get.off(() => LoginScreen());
       }
     } catch (e) {
-      Get.snackbar(
-          'Error', 'Failed to submit onboarding data: ${e.toString()}');
+      Get.snackbar('Error', 'Failed to submit onboarding data: ${e.toString()}');
     } finally {
       isLoading(false);
     }

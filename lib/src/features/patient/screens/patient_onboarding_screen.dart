@@ -21,9 +21,8 @@ class PatientOnboardingScreen extends StatelessWidget {
                     controller: controller.pageController,
                     onPageChanged: (index) =>
                         controller.currentStep.value = index,
+                    physics: NeverScrollableScrollPhysics(),
                     children: [
-                      _buildAgeStep(),
-                      _buildGenderStep(),
                       _buildDrugChoiceStep(),
                       _buildInjectionFrequencyStep(),
                       _buildHIVStatusStep(),
@@ -52,7 +51,7 @@ class PatientOnboardingScreen extends StatelessWidget {
           ),
           SizedBox(height: 8),
           LinearProgressIndicator(
-            value: (controller.currentStep.value + 1) / 6,
+            value: (controller.currentStep.value + 1) / 4,
             backgroundColor: Colors.blue[100],
             valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
           ),
@@ -61,48 +60,9 @@ class PatientOnboardingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAgeStep() {
-    return _buildStepContainer(
-      title: 'How old are you?',
-      content: TextField(
-        keyboardType: TextInputType.number,
-        style: TextStyle(fontSize: 18),
-        decoration: InputDecoration(
-          labelText: 'Enter your age',
-          border: OutlineInputBorder(),
-          prefixIcon: Icon(Icons.cake, color: Colors.blue),
-        ),
-        onChanged: (value) => controller.age.value = value,
-      ),
-      animation: 'assets/animations/animation.json',
-    );
-  }
-
-  Widget _buildGenderStep() {
-    return _buildStepContainer(
-      title: 'What\'s your gender?',
-      content: DropdownButtonFormField<String>(
-        value: controller.gender.value.isEmpty ? null : controller.gender.value,
-        hint: Text('Select gender'),
-        items: ['Male', 'Female', 'Other'].map((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(value),
-          );
-        }).toList(),
-        onChanged: (value) => controller.gender.value = value!,
-        decoration: InputDecoration(
-          border: OutlineInputBorder(),
-          prefixIcon: Icon(Icons.person, color: Colors.blue),
-        ),
-      ),
-      animation: 'assets/animations/animation.json',
-    );
-  }
-
   Widget _buildDrugChoiceStep() {
     return _buildStepContainer(
-      title: 'Primary drug of choice',
+      title: 'Main Drug Used',
       content: DropdownButtonFormField<String>(
         value: controller.drugOfChoice.value.isEmpty
             ? null
@@ -127,7 +87,7 @@ class PatientOnboardingScreen extends StatelessWidget {
 
   Widget _buildInjectionFrequencyStep() {
     return _buildStepContainer(
-      title: 'How often do you inject?',
+      title: 'How often did you use it ?',
       content: DropdownButtonFormField<String>(
         value: controller.injectionFrequency.value.isEmpty
             ? null
@@ -158,7 +118,7 @@ class PatientOnboardingScreen extends StatelessWidget {
             ? null
             : controller.hivStatus.value,
         hint: Text('Select HIV status'),
-        items: ['Positive', 'Negative', 'Unknown'].map((String value) {
+        items: ['Positive', 'Negative', 'Don\'t know'].map((String value) {
           return DropdownMenuItem<String>(
             value: value,
             child: Text(value),
@@ -176,13 +136,14 @@ class PatientOnboardingScreen extends StatelessWidget {
 
   Widget _buildNeedleSharingStep() {
     return _buildStepContainer(
-      title: 'Needle sharing history',
+      title: 'Have you shared a needle',
       content: DropdownButtonFormField<String>(
         value: controller.needleSharingHistory.value.isEmpty
             ? null
             : controller.needleSharingHistory.value,
-        hint: Text('Needle sharing history'),
-        items: ['Never', 'In the past', 'Currently'].map((String value) {
+        hint: Text('Have you shared a needle'),
+        items:
+            ['Never', 'Yes in the past', 'Yes Currently'].map((String value) {
           return DropdownMenuItem<String>(
             value: value,
             child: Text(value),
@@ -237,7 +198,6 @@ class PatientOnboardingScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // "Back" button styled as an OutlinedButton
           Expanded(
             child: OutlinedButton(
               onPressed: controller.currentStep.value > 0
@@ -256,19 +216,9 @@ class PatientOnboardingScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          // "Next" or "Submit" button styled as an ElevatedButton
           Expanded(
             child: ElevatedButton(
-              onPressed: () {
-                if (controller.currentStep.value < 5) {
-                  controller.pageController.nextPage(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  );
-                } else {
-                  controller.submitOnboardingData();
-                }
-              },
+              onPressed: controller.nextPage,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 shape: const RoundedRectangleBorder(),
@@ -277,7 +227,7 @@ class PatientOnboardingScreen extends StatelessWidget {
                 side: const BorderSide(color: Colors.blue),
               ),
               child: Text(
-                controller.currentStep.value == 5 ? 'Submit' : 'Next',
+                controller.currentStep.value == 3 ? 'Submit' : 'Next',
               ),
             ),
           ),

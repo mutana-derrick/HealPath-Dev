@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:healpath/src/features/authentication/controllers/sign_up_controller.dart';
+import 'package:intl/intl.dart';
 
 class SignUpForm extends StatefulWidget {
   const SignUpForm({super.key});
@@ -17,6 +18,8 @@ class _SignUpFormState extends State<SignUpForm> {
   String _email = '';
   String _phone = '';
   String _password = '';
+  DateTime? _dateOfBirth;
+  String _gender = '';
   PlatformFile? _file;
 
   Future<void> _pickFile() async {
@@ -28,6 +31,26 @@ class _SignUpFormState extends State<SignUpForm> {
         _controller.selectedFileName.value = _file!.name;
       });
     }
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null && picked != _dateOfBirth) {
+      setState(() {
+        _dateOfBirth = picked;
+      });
+    }
+  }
+
+  bool _isAgeAbove18() {
+    if (_dateOfBirth == null) return false;
+    final age = DateTime.now().difference(_dateOfBirth!).inDays ~/ 365;
+    return age >= 18;
   }
 
   @override
@@ -96,6 +119,58 @@ class _SignUpFormState extends State<SignUpForm> {
               onSaved: (value) => _phone = value!,
             ),
             const SizedBox(height: 30),
+
+            // Gender Field
+            DropdownButtonFormField<String>(
+              decoration: InputDecoration(
+                prefixIcon: Icon(Icons.person),
+                labelText: "Gender",
+                border: OutlineInputBorder(),
+              ),
+              value: _gender.isEmpty ? null : _gender,
+              items: ["Male", "Female"].map((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  _gender = newValue!;
+                });
+              },
+              validator: (value) =>
+                  value == null ? "Please select a gender" : null,
+            ),
+            const SizedBox(height: 20),
+
+            // Date of Birth Field
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                InkWell(
+                  onTap: () => _selectDate(context),
+                  child: InputDecorator(
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.calendar_today),
+                      labelText: "Date of Birth",
+                      border: OutlineInputBorder(),
+                    ),
+                    child: Text(
+                      _dateOfBirth == null
+                          ? "Select Date"
+                          : DateFormat('yyyy-MM-dd').format(_dateOfBirth!),
+                    ),
+                  ),
+                ),
+                if (_dateOfBirth != null && !_isAgeAbove18())
+                  Text(
+                    "You must be at least 18 years old to sign up.",
+                    style: TextStyle(color: Colors.red, fontSize: 12),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 20),
 
             // File Upload Field
             Column(
@@ -175,8 +250,8 @@ class _SignUpFormState extends State<SignUpForm> {
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         _formKey.currentState!.save();
-                        _controller.signUpPatient(
-                            _email, _password, _fullName, _phone, _file);
+                        _controller.signUpPatient(_email, _password, _fullName,
+                            _phone, _dateOfBirth!, _gender, _file);
                       }
                     },
                     style: ElevatedButton.styleFrom(

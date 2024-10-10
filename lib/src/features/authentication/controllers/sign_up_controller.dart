@@ -18,11 +18,17 @@ class SignUpController extends GetxController {
   var selectedFileName = ''.obs;
   var isPasswordVisible = false.obs; // Password visibility tracker
 
-  /// Function to handle patient sign-up
+    /// Function to handle patient sign-up
   Future<void> signUpPatient(String email, String password, String fullName,
-      String phoneNumber, PlatformFile? file) async {
+      String phoneNumber, DateTime dateOfBirth, String gender, PlatformFile? file) async {
     try {
       isLoading(true);
+
+      // Check if age is above 18
+      final age = DateTime.now().difference(dateOfBirth).inDays ~/ 365;
+      if (age < 18) {
+        throw Exception("You must be at least 18 years old to sign up.");
+      }
 
       // Firebase Authentication
       UserCredential userCredential = await _auth
@@ -41,6 +47,8 @@ class SignUpController extends GetxController {
         'email': email,
         'fullName': fullName,
         'phoneNumber': phoneNumber,
+        'dateOfBirth': dateOfBirth,
+        'gender': gender,
         'role': 'patient',
         'status': 'Active',
         'createdAt': DateTime.now(),
@@ -62,7 +70,7 @@ class SignUpController extends GetxController {
 
       _showSnackBar("Success", "Account created successfully!", true);
 
-      // Navigate to the onboarding screen instead of the login screen
+      // Navigate to the onboarding screen
       Get.off(() => PatientOnboardingScreen());
     } catch (e) {
       _showSnackBar("Error", e.toString(), false);
