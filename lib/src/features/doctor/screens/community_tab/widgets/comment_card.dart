@@ -6,7 +6,7 @@ class CommentCard extends StatelessWidget {
 
   const CommentCard({super.key, required this.comment});
 
-  @override 
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -22,11 +22,13 @@ class CommentCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(comment.userName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(comment.userName,
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
                 Text(comment.content),
                 const SizedBox(height: 4),
-                Text(comment.timestamp, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                Text(comment.timestamp,
+                    style: const TextStyle(color: Colors.grey, fontSize: 12)),
               ],
             ),
           ),

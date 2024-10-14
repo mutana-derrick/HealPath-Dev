@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../models/post.dart';
 
-
 class PostCard extends StatefulWidget {
   final Post post;
   final VoidCallback onTap;
@@ -77,7 +76,8 @@ class _PostCardState extends State<PostCard> {
             Row(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.thumb_up, color: Colors.blue, size: 16),
+                  icon:
+                      const Icon(Icons.thumb_up, color: Colors.blue, size: 16),
                   onPressed: () => _incrementLikes(updatedPost),
                 ),
                 const SizedBox(width: 4),

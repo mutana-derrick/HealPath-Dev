@@ -27,32 +27,58 @@ class PatientsController extends GetxController {
     isLoading.value = true;
     errorMessage.value = '';
     try {
-      QuerySnapshot snapshot = await _firestore
+      QuerySnapshot userSnapshot = await _firestore
           .collection('users')
           .where('role', isEqualTo: 'patient')
           .get();
 
-      patients.value = snapshot.docs.map((doc) {
-        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      List<Patient> fetchedPatients = [];
 
-        // Handle Timestamp to String conversion for 'createdAt'
-        Timestamp? createdAtTimestamp = data['createdAt'];
-        String formattedDate = '';
+      for (var doc in userSnapshot.docs) {
+        try {
+          Map<String, dynamic>? userData = doc.data() as Map<String, dynamic>?;
 
-        if (createdAtTimestamp != null) {
-          DateTime date = createdAtTimestamp.toDate();
-          formattedDate =
-              '${date.year}-${date.month}-${date.day}'; // Format as needed
+          if (userData == null) {
+            print('Warning: Null user data for document ${doc.id}');
+            continue;
+          }
+
+          // Fetch corresponding patient data
+          DocumentSnapshot patientSnapshot =
+              await _firestore.collection('patients').doc(doc.id).get();
+
+          Map<String, dynamic>? patientData =
+              patientSnapshot.data() as Map<String, dynamic>?;
+
+          if (patientData == null) {
+            print('Warning: Null patient data for document ${doc.id}');
+            continue;
+          }
+
+          // Handle Timestamp to String conversion for 'createdAt'
+          Timestamp? createdAtTimestamp = userData['createdAt'] as Timestamp?;
+          String formattedDate = '';
+          if (createdAtTimestamp != null) {
+            DateTime date = createdAtTimestamp.toDate();
+            formattedDate = '${date.year}-${date.month}-${date.day}';
+          }
+
+          // Combine user and patient data
+          Map<String, dynamic> combinedData = {
+            ...userData,
+            ...patientData,
+            'id': doc.id,
+            'admissionDate': formattedDate,
+          };
+
+          fetchedPatients.add(Patient.fromMap(combinedData));
+        } catch (e) {
+          print('Error processing document ${doc.id}: $e');
+          // Optionally, you can add this error to a list of errors to display to the user
         }
+      }
 
-        return Patient(
-          name: data['fullName'] ?? '',
-          id: doc.id,
-          status: data['status'] ?? 'Active',
-          admissionDate: formattedDate, // Use the formatted date
-        );
-      }).toList();
-
+      patients.value = fetchedPatients;
       filterPatients(); // Apply the initial filtering based on search query
     } catch (e) {
       errorMessage.value = 'Error fetching patients: $e';
@@ -178,9 +204,13 @@ class PatientsTab extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: ListTile(
         leading: CircleAvatar(
-          child: Text(patient.name[0]),
+          backgroundColor: Colors.blue,
+          child: Text(
+            patient.name.isNotEmpty ? patient.name[0].toUpperCase() : 'U',
+            style: TextStyle(color: Colors.white),
+          ),
         ),
-        title: Text(patient.name),
+        title: Text(patient.name.isNotEmpty ? patient.name : 'Unknown'),
         subtitle: Text("| Admitted: ${patient.admissionDate}"),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,

@@ -128,9 +128,16 @@ class _PatientDetailsModalState extends State<PatientDetailsModal> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildInfoRow('Name', widget.patient.name),
-            // _buildInfoRow('ID', widget.patient.id),
             _buildInfoRow('Admission Date', widget.patient.admissionDate),
             _buildInfoRow('Status', widget.patient.status),
+            _buildInfoRow('Age', widget.patient.age.toString()),
+            _buildInfoRow('Mostly Used Drug', widget.patient.drugOfChoice),
+            _buildInfoRow('Gender', widget.patient.gender),
+            _buildInfoRow('HIV Status', widget.patient.hivStatus),
+            _buildInfoRow(
+                'Injection Frequency', widget.patient.injectionFrequency),
+            _buildInfoRow(
+                'Needle Sharing History', widget.patient.needleSharingHistory),
           ],
         ),
       ),

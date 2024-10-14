@@ -175,16 +175,16 @@ class _ReportViewState extends State<ReportView> {
             const Text('Summary',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
-            _buildSummaryItem('Total PWID enrolled',
-                reportData['totalPWID']?.toString() ?? 'N/A'),
+            _buildSummaryItem(
+                'Total Patients', reportData['totalPWID']?.toString() ?? 'N/A'),
             _buildSummaryItem(
                 'HIV Prevalence', '${reportData['hivPrevalence'] ?? 'N/A'}%'),
             _buildSummaryItem(
                 'Median Age', '${reportData['medianAge'] ?? 'N/A'} years'),
             _buildSummaryItem(
-                'Male PWID', '${reportData['malePWID'] ?? 'N/A'}%'),
+                'Male Patient', '${reportData['malePWID'] ?? 'N/A'}%'),
             _buildSummaryItem(
-                'Female PWID', '${reportData['femalePWID'] ?? 'N/A'}%'),
+                'Female Patient', '${reportData['femalePWID'] ?? 'N/A'}%'),
           ],
         ),
       ),
@@ -267,7 +267,7 @@ class _ReportViewState extends State<ReportView> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
             SizedBox(
-              height: 200,
+              height: 400,
               child: BarChart(
                 BarChartData(
                   alignment: BarChartAlignment.spaceAround,
@@ -326,7 +326,7 @@ class _ReportViewState extends State<ReportView> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
             SizedBox(
-              height: 200,
+              height: 400,
               child: BarChart(
                 BarChartData(
                   alignment: BarChartAlignment.spaceAround,

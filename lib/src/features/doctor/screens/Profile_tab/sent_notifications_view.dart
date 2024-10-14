@@ -44,10 +44,16 @@ class SentNotificationsView extends StatelessWidget {
                           'Read by: ${(data['readBy'] as List).length} patients'),
                       const SizedBox(height: 8),
                       ElevatedButton(
-                        child: const Text('View Readers'),
                         onPressed: () {
                           _showReadersDialog(context, data['readBy'] as List);
                         },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Colors.blue, // Set background color to blue
+                          foregroundColor:
+                              Colors.white, // Set text color to white
+                        ),
+                        child: const Text('View Readers'),
                       ),
                     ],
                   ),
