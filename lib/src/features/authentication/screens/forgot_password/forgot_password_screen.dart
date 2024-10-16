@@ -1,25 +1,71 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:healpath/src/features/authentication/screens/forgot_password/otp_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:healpath/src/features/authentication/screens/forgot_password/otp_screen.dart';
 
 class ForgotPasswordScreen extends StatelessWidget {
   ForgotPasswordScreen({Key? key}) : super(key: key);
 
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance; // Initialize FirebaseAuth
 
   // Email validation function
   String? _validateEmail(String? value) {
     if (value == null || value.isEmpty) {
       return 'Please enter your email';
     }
-    // Regular expression for validating an email
     const emailPattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
     final regex = RegExp(emailPattern);
     if (!regex.hasMatch(value)) {
       return 'Enter a valid email address';
     }
     return null;
+  }
+
+  Future<void> _sendPasswordResetEmail(BuildContext context) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: _emailController.text);
+      Get.snackbar(
+        "Success",
+        "Password reset email sent! Check your inbox.",
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.lightBlue[100],
+        colorText: Colors.blue[900],
+        borderRadius: 10,
+        margin: EdgeInsets.all(15),
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+        duration: Duration(seconds: 4),
+        icon: Icon(Icons.check_circle, color: Colors.blue[900]),
+        shouldIconPulse: false,
+        snackStyle: SnackStyle.FLOATING,
+      );
+      // Navigate to OTPScreen if necessary
+      // Get.to(() => const OTPScreen()); // Uncomment if needed
+    } on FirebaseAuthException catch (e) {
+      String errorMessage;
+      if (e.code == 'invalid-email') {
+        errorMessage = 'The email address is not valid.';
+      } else if (e.code == 'user-not-found') {
+        errorMessage = 'No user found for that email.';
+      } else {
+        errorMessage = e.message ?? 'An error occurred. Please try again.';
+      }
+      Get.snackbar(
+        "Error",
+        errorMessage,
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red[100],
+        colorText: Colors.red[900],
+        borderRadius: 10,
+        margin: EdgeInsets.all(15),
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+        duration: Duration(seconds: 4),
+        icon: Icon(Icons.error, color: Colors.red[900]),
+        shouldIconPulse: false,
+        snackStyle: SnackStyle.FLOATING,
+      );
+    }
   }
 
   @override
@@ -73,21 +119,21 @@ class ForgotPasswordScreen extends StatelessWidget {
                           const BorderSide(color: Colors.blue, width: 2),
                     ),
                   ),
-                  validator: _validateEmail, // Added validation here
+                  validator: _validateEmail,
                 ),
               ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    Get.to(() => const OTPScreen());
+                    _sendPasswordResetEmail(context);
                   }
                 },
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white,
                   backgroundColor: Colors.blue,
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: const RoundedRectangleBorder(),
+                  // shape: const RoundedRectangleBorder(),
                 ),
                 child: const Text(
                   "Reset Password",

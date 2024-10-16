@@ -36,6 +36,7 @@ class _PatientDetailsModalState extends State<PatientDetailsModal> {
   final TextEditingController _commentController = TextEditingController();
   String? uploadedFile;
   String? doctorName; // To store the doctor's name
+  String? pdfUrl;
 
   @override
   void initState() {
@@ -351,9 +352,18 @@ class _PatientDetailsModalState extends State<PatientDetailsModal> {
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Medical history.pdf',
-              style: TextStyle(color: Colors.blue),
+            GestureDetector(
+              onTap: () {
+                // Show custom top SnackBar when clicked
+                showTopSnackBar(
+                  context,
+                  'Unable to download the file. Your free trial has ended.',
+                );
+              },
+              child: const Text(
+                'Medical-history.pdf',
+                style: TextStyle(color: Colors.blue),
+              ),
             ),
           ],
         ),
@@ -386,4 +396,53 @@ void showSuccessSnackBar(BuildContext context, String message) {
       duration: const Duration(seconds: 3),
     ),
   );
+}
+
+// Function to show a danger snackbar at the top
+void showTopSnackBar(BuildContext context, String message) {
+  final overlay = Overlay.of(context);
+  final overlayEntry = OverlayEntry(
+    builder: (context) => Positioned(
+      top: 50.0, // Adjust the position as needed
+      left: 20.0,
+      right: 20.0,
+      child: Material(
+        color: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.red[100],
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 10,
+                spreadRadius: 1,
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.error, color: Colors.red[900]),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  message,
+                  style: TextStyle(color: Colors.red[900]),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+
+  // Insert the overlay
+  overlay.insert(overlayEntry);
+
+  // Remove the overlay after some time
+  Future.delayed(const Duration(seconds: 3), () {
+    overlayEntry.remove();
+  });
 }

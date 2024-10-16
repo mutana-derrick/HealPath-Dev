@@ -24,7 +24,7 @@ void main() async {
     announcement: false,
     badge: true,
     carPlay: false,
-    criticalAlert: false,
+    criticalAlert: false, 
     provisional: false,
     sound: true,
   );

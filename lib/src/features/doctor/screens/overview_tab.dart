@@ -22,10 +22,8 @@ class OverviewController extends GetxController {
     errorMessage.value = '';
     try {
       // Fetch total patients with role 'patient'
-      QuerySnapshot patientsSnapshot = await _firestore
-          .collection('users')
-          .where('role', isEqualTo: 'patient')
-          .get();
+      QuerySnapshot patientsSnapshot =
+          await _firestore.collection('patients').get();
       totalPatients.value = patientsSnapshot.size;
 
       // Fetch new patients (this month) with role 'patient'

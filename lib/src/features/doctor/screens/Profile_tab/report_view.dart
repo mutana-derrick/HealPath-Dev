@@ -128,12 +128,19 @@ class _ReportViewState extends State<ReportView> {
             children: [
               const Text(
                 'Treatment Report',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               ElevatedButton.icon(
                 onPressed: () => _saveReport(context),
                 icon: const Icon(Icons.save),
                 label: const Text('Save'),
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.blue, // Text color
+                ),
               ),
             ],
           ),
