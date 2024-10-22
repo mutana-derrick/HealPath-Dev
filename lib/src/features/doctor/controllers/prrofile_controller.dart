@@ -16,7 +16,7 @@ class ProfileController {
         }
       }
     } catch (e) {
-      print('Error fetching user info: $e');
+      // print('Error fetching user info: $e');
     }
     return null;
   }
@@ -28,7 +28,7 @@ class ProfileController {
         await _firestore.collection('users').doc(user.uid).update(userInfo);
       }
     } catch (e) {
-      print('Error updating user info: $e');
+      // print('Error updating user info: $e');
     }
   }
 }

@@ -8,7 +8,7 @@ import 'package:healpath/src/utils/theme/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -24,11 +24,11 @@ void main() async {
     announcement: false,
     badge: true,
     carPlay: false,
-    criticalAlert: false, 
+    criticalAlert: false,
     provisional: false,
     sound: true,
   );
-  
+
   print('User granted permission: ${settings.authorizationStatus}');
 
   runApp(const MyApp());
@@ -40,6 +40,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.light, // Change to ThemeMode.system if needed

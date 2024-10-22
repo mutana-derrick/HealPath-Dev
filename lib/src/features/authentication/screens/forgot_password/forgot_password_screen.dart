@@ -40,8 +40,9 @@ class ForgotPasswordScreen extends StatelessWidget {
         shouldIconPulse: false,
         snackStyle: SnackStyle.FLOATING,
       );
-      // Navigate to OTPScreen if necessary
-      // Get.to(() => const OTPScreen()); // Uncomment if needed
+
+      // Clear the email controller after sending the email
+      _emailController.clear();
     } on FirebaseAuthException catch (e) {
       String errorMessage;
       if (e.code == 'invalid-email') {
@@ -133,7 +134,6 @@ class ForgotPasswordScreen extends StatelessWidget {
                   foregroundColor: Colors.white,
                   backgroundColor: Colors.blue,
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  // shape: const RoundedRectangleBorder(),
                 ),
                 child: const Text(
                   "Reset Password",

@@ -12,7 +12,7 @@ import 'widgets/search_bar_with_notifications.dart';
 import 'widgets/notifications_list.dart';
 
 class PatientCommunityTab extends StatefulWidget {
-  const PatientCommunityTab({Key? key}) : super(key: key);
+  const PatientCommunityTab({super.key});
 
   @override
   _PatientCommunityTabState createState() => _PatientCommunityTabState();
@@ -103,11 +103,12 @@ class _PatientCommunityTabState extends State<PatientCommunityTab> {
 
   Widget _buildPostsList() {
     return Obx(() => ListView.builder(
-          itemCount: controller.posts.length,
+          itemCount: controller.filteredPosts.length,
           itemBuilder: (context, index) {
             return PostCard(
-              post: controller.posts[index],
-              onTap: () => _showComments(context, controller.posts[index]),
+              post: controller.filteredPosts[index],
+              onTap: () =>
+                  _showComments(context, controller.filteredPosts[index]),
             );
           },
         ));

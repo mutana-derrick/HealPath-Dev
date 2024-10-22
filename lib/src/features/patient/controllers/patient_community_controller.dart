@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:healpath/src/features/patient/models/models.dart';
-import 'package:intl/intl.dart'; // Import this for date formatting
+import 'package:intl/intl.dart';
 
 class PatientCommunityController extends GetxController {
   var posts = <Post>[].obs;
+  var filteredPosts = <Post>[].obs;
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   @override
@@ -23,7 +24,6 @@ class PatientCommunityController extends GetxController {
       var postList = await Future.wait(postDocs.docs.map((doc) async {
         var data = doc.data();
 
-        // Fetch comments for each post
         var commentDocs = await firestore
             .collection('posts')
             .doc(doc.id)
@@ -54,13 +54,26 @@ class PatientCommunityController extends GetxController {
                   .format((data['timestamp'] as Timestamp).toDate())
               : '',
           likes: data['likes'] ?? 0,
-          comments: commentList, // Add comments to the post
+          comments: commentList,
         );
       }).toList());
 
       posts.assignAll(postList);
+      filteredPosts.assignAll(postList);
     } catch (e) {
       print('Error fetching doctor posts: $e');
+    }
+  }
+
+  void searchPosts(String query) {
+    if (query.isEmpty) {
+      filteredPosts.assignAll(posts);
+    } else {
+      filteredPosts.assignAll(posts.where((post) =>
+          post.content.toLowerCase().contains(query.toLowerCase()) ||
+          post.userName.toLowerCase().contains(query.toLowerCase()) ||
+          post.comments.any((comment) =>
+              comment.content.toLowerCase().contains(query.toLowerCase()))));
     }
   }
 

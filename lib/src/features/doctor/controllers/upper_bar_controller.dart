@@ -27,7 +27,7 @@ class DoctorController extends GetxController {
 
         if (userDoc.exists) {
           doctorName.value = userDoc['fullName'] ??
-              'Doctor'; // Replace with the correct field in Firestore
+              'Doctor';
         } else {
           errorMessage.value = 'User document does not exist';
         }
