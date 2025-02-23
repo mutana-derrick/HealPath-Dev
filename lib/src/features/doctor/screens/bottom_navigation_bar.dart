@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 
 class CustomBottomNavigationBar extends StatelessWidget {
-  final ValueChanged<int> onTabChange;
+  final ValueChanged onTabChange;
 
   const CustomBottomNavigationBar({super.key, required this.onTabChange});
 
@@ -10,28 +10,27 @@ class CustomBottomNavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.blue, // Background color for the nav bar
+        color: Colors.blue,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.5), // Shadow color
-            spreadRadius: 1, // Spread of the shadow
-            blurRadius: 10, // Softness of the shadow
-            offset: const Offset(0, -3), // Position of the shadow (X,Y)
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 1,
+            blurRadius: 10,
+            offset: const Offset(0, -3),
           ),
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         child: GNav(
           backgroundColor: Colors.blue,
-          color: Colors.blue[900], // Unselected items color
-          activeColor: Colors.white, // Selected items color
-          tabBackgroundColor:
-              Colors.blue.shade600, // Background color of selected tab
-          padding: const EdgeInsets.all(16), // Padding inside the tabs
-          gap: 5, // Gap between icon and text
-          duration: const Duration(milliseconds: 1000), // Animation duration
-          onTabChange: onTabChange, // Handle tab changes
+          color: Colors.blue[900],
+          activeColor: Colors.white,
+          tabBackgroundColor: Colors.blue.shade600,
+          padding: const EdgeInsets.all(16),
+          gap: 5,
+          duration: const Duration(milliseconds: 1000),
+          onTabChange: onTabChange,
           tabs: const [
             GButton(
               icon: Icons.home_sharp,
@@ -43,6 +42,10 @@ class CustomBottomNavigationBar extends StatelessWidget {
             ),
             GButton(
               icon: Icons.chat,
+              text: "Messages", // Changed from "Community" to "Messages"
+            ),
+            GButton(
+              icon: Icons.groups, // Changed from chat to groups
               text: "Community",
             ),
             GButton(

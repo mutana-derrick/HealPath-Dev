@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_nav_bar/google_nav_bar.dart'; // Import the GNav package
 import 'package:healpath/src/features/patient/screens/community_tab/patient_community_tab.dart';
 import 'package:healpath/src/features/patient/screens/emergency_tab/patient_emergency_tab.dart';
+import 'package:healpath/src/features/patient/screens/patient_chat_screen.dart';
 import 'package:healpath/src/features/patient/screens/profile_tab/patient_profile_tab.dart';
 
 class PatientScreen extends StatelessWidget {
@@ -17,9 +18,10 @@ class PatientScreen extends StatelessWidget {
           body: SafeArea(
             child: IndexedStack(
               index: controller.tabIndex,
-              children: const [
+              children: [
                 PatientCommunityTab(),
                 PatientEmergencyTab(),
+                PatientChatScreen(),
                 PatientProfileTab()
               ],
             ),
@@ -58,6 +60,10 @@ class PatientScreen extends StatelessWidget {
                   GButton(
                     icon: Icons.emergency,
                     text: 'Emergency',
+                  ),
+                  GButton(
+                    icon: Icons.chat,
+                    text: 'Messages',
                   ),
                   GButton(
                     icon: Icons.person,

@@ -14,7 +14,7 @@ class SplashScreenController extends GetxController
 
     // Initialize the AnimationController with a duration of 5 seconds
     animationController = AnimationController(
-      duration: const Duration(seconds: 30), // Animation lasts for 5 seconds
+      duration: const Duration(seconds: 15), // Animation lasts for 5 seconds
       vsync: this,
     );
 
